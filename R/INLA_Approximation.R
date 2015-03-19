@@ -1,4 +1,4 @@
-#'@title .calculate.moller.hetero
+#'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param coal.factor is a vector with coalescent times in increasing order 
 #'@param s sampling times and coalescent times in increasing order
@@ -99,14 +99,14 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
   return(list(result = mod4, grid = grid, data = data, E = E.factor2.log))
 }
 
-#'@title .calculate.moller
+#'@title calculate.moller
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param data1 is a dataframe with two columns. The first column has the intercoalescent times and the second column the number of lineages
 #'@param lengthout number of grid points
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-calculate.moller<-function(tree,lengthout,L){
+calculate.moller<-function(tree,lengthout,L=1){
   ci<-coalescent.intervals(tree)
   data1<-cbind(ci$interval.length,ci$lineages)
   s<-cumsum(data1[,1])
