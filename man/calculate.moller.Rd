@@ -2,9 +2,9 @@
 % Please edit documentation in R/INLA_Approximation.R
 \name{calculate.moller}
 \alias{calculate.moller}
-\title{.calculate.moller}
+\title{calculate.moller}
 \usage{
-calculate.moller(tree, lengthout, L)
+calculate.moller(tree, lengthout, L = 1)
 }
 \arguments{
 \item{lengthout}{number of grid points}
