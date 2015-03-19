@@ -105,6 +105,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
 #'@param lengthout number of grid points
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
+
 calculate.moller<-function(tree,lengthout,L){
   ci<-coalescent.intervals(tree)
   data1<-cbind(ci$interval.length,ci$lineages)
