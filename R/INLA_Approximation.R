@@ -227,9 +227,14 @@ stan_output<-function(INLA_out){
 #'@param beta TODO
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-calculate.moller.hetero2<-function (coal.factor, s, event, lengthout, prec_alpha = 0.01, 
+calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01, 
                                    prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL) 
 {
+  stats<-heterochronous.gp.stat(tree)
+  args<-gen_INLA_args(coal_times=stats$coal.times, s_times=stats$samp_times, n_sampled=stats$sampled.lineages)
+  coal.factor<-args$coal_factor
+  s<-args$s
+  event<-args$event
   
   if (prec_alpha == 0.01 & prec_beta == 0.01 & !is.null(alpha) & 
         !is.null(beta)) {
