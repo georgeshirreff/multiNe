@@ -101,7 +101,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
 
 #'@title calculate.moller
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
-#'@param data1 is a dataframe with two columns. The first column has the intercoalescent times and the second column the number of lineages
+#'@param tree is a phylo object with a single tree
 #'@param lengthout number of grid points
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
