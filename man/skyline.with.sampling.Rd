@@ -4,7 +4,7 @@
 \alias{skyline.with.sampling}
 \title{skyline.with.sampling}
 \usage{
-\method{skyline}{with.sampling}(ci)
+skyline.with.sampling(ci)
 }
 \description{
 For a given datedCI object return the skyline for each coalescent interval
