@@ -208,8 +208,8 @@ stan_output<-function(INLA_out){
   
   results<-matrix(NA,nrow=length(grid),ncol=4)
   results[,1]<-grid
-  results[,3]<-exp(-mod$"0.975quant")
-  results[,2]<-exp(-mod$"0.025quant")
-  results[,4]<-exp(-mod$"0.5quant")
+  results[,4]<-exp(-mod$"0.975quant")
+  results[,3]<-exp(-mod$"0.025quant")
+  results[,2]<-exp(-mod$"0.5quant")
   return(results)
 }
