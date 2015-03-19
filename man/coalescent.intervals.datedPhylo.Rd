@@ -4,7 +4,7 @@
 \alias{coalescent.intervals.datedPhylo}
 \title{coalescent.intervals.datedPhylo}
 \usage{
-\method{coalescent.intervals}{datedPhylo}(tr)
+coalescent.intervals.datedPhylo(tr)
 }
 \description{
 Functions to find the skyline of a binary, rooted tree with heterochronous

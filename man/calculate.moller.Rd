@@ -7,11 +7,11 @@
 calculate.moller(tree, lengthout, L = 1)
 }
 \arguments{
+\item{tree}{is a phylo object with a single tree}
+
 \item{lengthout}{number of grid points}
 
 \item{L}{the length for the definition of the grid}
-
-\item{data1}{is a dataframe with two columns. The first column has the intercoalescent times and the second column the number of lineages}
 }
 \description{
 Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
