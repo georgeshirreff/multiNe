@@ -1,0 +1,13 @@
+Package: multiNe
+Title: Multiple Ne estimators
+Version: 0.0.0
+Authors@R: person(given="George", family="Shirreff",email="georgeshirreff@gmail.com", role = c("cre","aut"))
+Description: Uses multiple methods to estimate the effective population size
+Depends: R (>= 3.1.2)
+License: What license is it under?
+LazyData: true
+Imports: ape,
+    adegenet,
+    phyclust,
+    phangorn,
+    INLA
