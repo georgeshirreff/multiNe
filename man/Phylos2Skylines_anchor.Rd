@@ -8,7 +8,7 @@ Phylos2Skylines_anchor(trees, output_type = c("list", "matrices", "master",
   "conf.int", "conf.int.plot"), file_type = "nex", package = NULL,
   outgroup = NULL, param.file.name = NULL, burninfrac = 0,
   max.trees = 1000, youngestTip = 0, timeForwards = F, scaling = 1,
-  plot_type = c("step", "linear"), ...)
+  plot_type = "step", ...)
 }
 \arguments{
 \item{trees}{Either a character string specifying the path to the tree file, or a multiPhylo object}

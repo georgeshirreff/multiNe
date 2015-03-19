@@ -1,4 +1,4 @@
-#'@title .calculate.moller.hetero
+#'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param coal.factor is a vector with coalescent times in increasing order 
 #'@param s sampling times and coalescent times in increasing order

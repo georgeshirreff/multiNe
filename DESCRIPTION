@@ -1,7 +1,10 @@
 Package: multiNe
 Title: Multiple Ne estimators
 Version: 0.0.0
-Authors@R: person(given="George", family="Shirreff",email="georgeshirreff@gmail.com", role = c("cre","aut"))
+Authors@R: c( person("George", "Shirreff",email="georgeshirreff@gmail.com", role = c("cre","aut")),
+              person(given="Julia", family="Palacios", email="julia.pal.r@@gmail.com", role = c("aut")),
+              person(given="Christine", family="Ewers", email="ewers.christine@@gmail.com", role = c("aut")),
+              person(given="Rebecca", family="Harris", email="rbharris@@uw.edu", role = c("aut")))
 Description: Uses multiple methods to estimate the effective population size
 Depends: R (>= 3.1.2)
 License: What license is it under?
@@ -11,3 +14,4 @@ Imports: ape,
     phyclust,
     phangorn,
     INLA
+
