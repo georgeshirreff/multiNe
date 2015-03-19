@@ -1,3 +1,14 @@
+#' @title .George
+#' @description For Thibaut
+#' 
+#' @examples .George(1)
+#' 
+
+.George <- function(x)
+{
+  print("This function doesn't do anything")
+}
+
 #' @title getNodeAges
 #' @description Returns a vector with the depths, or heights of the nodes in the tree
 #' @description Depends on a hidden function nodeHeight, from phangorn. 
@@ -52,7 +63,7 @@ getNodeAges<-function(x,from_past=F)
 #' 
 
 Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","master","conf.int","conf.int.plot") ,file_type="nex", package=NULL, outgroup=NULL,
-                             param.file.name=NULL, burninfrac=0, max.trees=1000,youngestTip=0,timeForwards=F,scaling=1,plot_type=c("step","linear"),...) {
+                             param.file.name=NULL, burninfrac=0, max.trees=1000,youngestTip=0,timeForwards=F,scaling=1,plot_type="step",...) {
 
   require(ape)
   if(is.character(trees))
