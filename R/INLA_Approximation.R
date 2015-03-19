@@ -106,7 +106,9 @@
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-.calculate.moller<-function(data1,lengthout,L){
+.calculate.moller<-function(tree,lengthout,L){
+  ci<-coalescent.intervals(tree)
+  data1<-cbind(ci$interval.length,ci$lineages)
   s<-cumsum(data1[,1])
   coal.factor<-data1[,2]*(data1[,2]-1)*.5
   length.min<-min(data1[,1])
