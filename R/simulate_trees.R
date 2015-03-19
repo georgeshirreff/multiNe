@@ -148,19 +148,19 @@
   intercoal_times = c(out[1], diff(out))
   lineages = branches
   coal_times<-cumsum(intercoal_times)
-  args<-.gen_INLA_args(coal_times,s_times,n_sampled)
+  args<-gen_INLA_args(coal_times,s_times,n_sampled)
   out<-.generate_newick(args,cbind(n_sampled,s_times))$newick
   return(out)
 }
 
-#'@title .gen_INLA_args
+#'@title gen_INLA_args
 #'@description Used for heterochronous sampling. It has nothing to do with INLA
 #'@param coal_times indicates the coalescent times
 #'@param s_times indicates the sampling times
 #'@param n_sampled the number of samples 
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 #'
-.gen_INLA_args<-function (coal_times, s_times, n_sampled) {
+gen_INLA_args<-function (coal_times, s_times, n_sampled) {
   n = length(coal_times) + 1
   data = matrix(0, nrow = n - 1, ncol = 2)
   data[, 1] = coal_times
