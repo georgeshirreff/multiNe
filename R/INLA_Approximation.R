@@ -11,7 +11,7 @@
 #'@param beta TODO
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-.calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha = 0.01, 
+calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha = 0.01, 
           prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL) 
 {
   
@@ -106,7 +106,7 @@
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-.calculate.moller<-function(tree,lengthout,L){
+calculate.moller<-function(tree,lengthout,L){
   ci<-coalescent.intervals(tree)
   data1<-cbind(ci$interval.length,ci$lineages)
   s<-cumsum(data1[,1])
