@@ -1,13 +1,3 @@
-#' @title .George
-#' @description Thibaut's desire
-#' 
-#' @examples .George(1)
-
-.George <- function(x)
-{
-  print("This function doesn't do anything")
-}
-
 #' @title coalescent.intervals.datedPhylo
 #' @description Functions to find the skyline of a binary, rooted tree with heterochronous
 #' @description tips, i.e. sequences were sampled sequentially in time.
