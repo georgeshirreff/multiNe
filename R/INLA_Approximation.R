@@ -182,7 +182,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
 calculate.moller<-function(tree,lengthout,L=1){
- if (class(tree)=="phylo") {return(.calculate.moller1(tree,lenghtout,L))}
+ if (class(tree)=="phylo") {return(.calculate.moller1(tree,lengthout,L))}
  else {
    L<-coalescent.intervals(tree[[1]])$total.depth
    for (j in 2:length(tree)){L<-min(L,coalescent.intervals(tree[[j]])$total.depth)}

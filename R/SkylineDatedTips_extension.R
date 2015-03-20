@@ -45,7 +45,11 @@ getNodeAges<-function(x,from_past=F)
 #' @description Can be directly applied to BEAST or MrBayes output, or files can be directly parsed by argument
 #' 
 #' @param trees Either a character string specifying the path to the tree file, or a multiPhylo object
-#' @param output_type list: a list of skyline objects. matrices: two matrices, each with a column for each tree and a row for each coalescent event in the tree. One matrix specifies the population size and one specifies the time at the end of the interval. master: a master table with the rows being every unique time point across all trees, with time specified in the row name, and each column is a different tree. conf.int: a matrix with each row being each unique event time and the columns being the 50%, 2.5% and 97.5% percentiles respectively. conf.int.plot: outputs the conf.int table but also plots them. 
+#' @param output_type list (a list of skyline objects) 
+#' @param output_type matrices (two matrices, each with a column for each tree and a row for each coalescent event in the tree. One matrix specifies the population size and one specifies the time at the end of the interval)
+#' @param output_type master (a master table with the rows being every unique time point across all trees, with time specified in the row name, and each column is a different tree) 
+#' @param output_type conf.int (a matrix with each row being each unique event time and the columns being the 50%, 2.5% and 97.5% percentiles respectively) 
+#' @param output_type conf.int.plot (outputs the conf.int table but also plots them)
 #' @param file_type: the format of the tree file
 #' @param outgroup: specify if the tree should be re-rooted at this node and then this node removed.
 #' @param package: what package has been used to create the param file (BEAST, MrBayes)
