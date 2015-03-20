@@ -202,6 +202,30 @@ plot_INLA = function(INLA_out, traj=NULL, xlim=NULL, ...)
     lines(grid, traj(grid))
 }
 
+
+#'@title plot_INLA2
+#'@description Plots a general output with 4 columns: time, median, lower and upper bound
+#'@param result Matrix with four columns
+#'@param traj the true trajectory
+#'@param xlim (optional)
+#'@author Julia Palacios \email{julia.pal.r@@gmail.com}
+
+plot_INLA2<-function(result, traj=NULL, xlim=NULL, ...){
+  grid = result[,1]
+  if (is.null(xlim)) {
+    xlim = c(max(grid), 0)
+  }
+  
+  plot(grid,result[,2],type="l",lwd=2.5,col="blue",log="y",
+       xlab="Time (past to present)",ylab="Scaled Effective Pop. Size",
+       xlim=xlim, ylim=c(min(result[grid > min(xlim) & grid < max(xlim),4]),
+                         max(result[grid > min(xlim) & grid < max(xlim),3])))
+  lines(grid,result[,3],lwd=2.5,col="blue",lty=2)
+  lines(grid,result[,4],lwd=2.5,col="blue",lty=2)
+  if (!is.null(traj)) lines(grid, traj(grid))
+}
+
+
 stan_output<-function(INLA_out){
   mod = INLA_out$result$summary.random$time
   grid = mod$"ID"
