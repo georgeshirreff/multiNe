@@ -205,6 +205,18 @@ gen_INLA_args<-function (coal_times, s_times, n_sampled) {
 
 ##This is the main function
 
+#'@title simulate.tree
+#'@description Simulates genealogies under the coalescent
+#'@param n Number of samples
+#'@param N Number of genealogies or trees
+#'@param sampling It can take two values: iso or hetero. If the sampling scheme is (iso) it generates an isochronous genealogy (all samples at time 0). Otherwise, it assumes it is heterochronous sampling.If hetero, you need to specify samples
+#'@param args String of characters for ms
+#'@param Ne The standard is set to 1. It takes any function as input for the demographic model
+#'@param max (optional) for thinning simulator. It is an upper bound on 1/Ne
+#'@param simulator It can either be null, ms or thinning. If null, it uses ape rcoal.
+#'@param sample It takes a matrix of two columns. The first column inciates the number of samples and the second column the sampling times
+#'@author Julia Palacios \email{julia.pal.r@@gmail.com}
+#'
 simulate.tree<-function(n=10,N=1,sampling="iso",args="-T -G 0.1",Ne=1,max=1,simulator=NULL,sample=NULL, ...){
   if (is.null(simulator)) {
     #Generates samples using rcoal with Ne=1. If this is a mistake, specify your simulator (ms,thinning,standard)
