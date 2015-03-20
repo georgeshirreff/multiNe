@@ -99,14 +99,14 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
   return(list(result = mod4, grid = grid, data = data, E = E.factor2.log))
 }
 
-#'@title calculate.moller
+#'@title .calculate.moller1
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param tree is a phylo object with a single tree
 #'@param lengthout number of grid points
 #'@param L the length for the definition of the grid
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-calculate.moller<-function(tree,lengthout,L=1){
+.calculate.moller1<-function(tree,lengthout,L=1){
   ci<-coalescent.intervals(tree)
   data1<-cbind(ci$interval.length,ci$lineages)
   s<-cumsum(data1[,1])
@@ -172,10 +172,29 @@ calculate.moller<-function(tree,lengthout,L=1){
   mod.moller.constant<-inla(formula,family="poisson",data=data,offset=E,control.predictor=list(compute=TRUE))
   
   return(stan_output(list(result=mod.moller.constant,grid=grid)))
-    
 }
 
+#'@title calculate.moller
+#'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
+#'@param tree is a phylo object with a single tree
+#'@param lengthout number of grid points
+#'@param L the length for the definition of the grid
+#'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
+calculate.moller<-function(tree,lengthout,L=1){
+ if (class(tree)=="phylo") {return(.calculate.moller1(tree,lenghtout,L))}
+ else {
+   L<-coalescent.intervals(tree[[1]])$total.depth
+   for (j in 2:length(tree)){L<-min(L,coalescent.intervals(tree[[j]])$total.depth)}
+   result<-matrix(NA,nrow=lengthout,ncol=length(tree)+1)
+   result[,1:2]<-.calculate.moller1(tree[[1]],lengthout,L)[,1:2]
+   for (j in (2:length(tree))){
+     result[,j+1]<-.calculate.moller1(tree[[j]],lengthout,L)[,2]
+   }
+   return(result)
+ }
+}
+ 
 #'@title plot_INLA
 #'@description Plots the output from the inla functions for Ne
 #'@param INLA_out Otput from the inla functions
@@ -225,6 +244,27 @@ plot_INLA2<-function(result, traj=NULL, xlim=NULL, ...){
   if (!is.null(traj)) lines(grid, traj(grid))
 }
 
+
+#'@title plot_INLA3
+#'@description Plots bunch of trees
+#'@param result Matrix with many columns
+#'@param traj the true trajectory
+#'@param xlim (optional)
+#'@author Julia Palacios \email{julia.pal.r@@gmail.com}
+plot_INLA3<-function(result, traj=NULL, xlim=NULL, ...){
+  grid = result[,1]
+  if (is.null(xlim)) {
+    xlim = c(max(grid), 0)
+  }
+  result2<-matrix(NA,nrow=nrow(result),ncol=2)
+  result2[,2]<-apply(result[,2:ncol(result)],1,mean)
+  plot(grid,result2[,2],type="l",lwd=2.5,col="blue",log="y",
+       xlab="Time (past to present)",ylab="Scaled Effective Pop. Size",
+       xlim=xlim, ylim=c(min(result[,2:ncol(result)]), max(result[,2:ncol(result)])))
+  for (j in 2:(ncol(result))){
+  lines(grid,result[,j],lwd=1.0,col="gray")}
+  if (!is.null(traj)) lines(grid, traj(grid))
+}
 
 stan_output<-function(INLA_out){
   mod = INLA_out$result$summary.random$time
