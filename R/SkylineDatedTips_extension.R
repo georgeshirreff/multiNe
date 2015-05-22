@@ -66,10 +66,16 @@ getNodeAges<-function(x,from_past=F)
 #' @examples Phylos2Skylines_anchor(trees)
 #' 
 
+#skyline_list<-Phylos2Skylines_anchor(trees=phylo,output_type="list",burninfrac=burninfrac,max.trees=max.trees,youngestTip=youngestTip,timeForwards=T)
+#conf.int_ES<-Phylos2Skylines_anchor(trees=trees_ES,epsilon=epsilon,output_type = "conf.int.plot",timeForwards=T,fixToDate=T,Date_FUN=Date_FUN,max.trees = 100)
+#conf.int_ES<-Phylos2Skylines_anchor(trees=trees_ES,epsilon=epsilon,output_type = "conf.int.plot",timeForwards=T,fixToDate=T,Date_FUN=Date_FUN,max.trees = 100)
 Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","master","conf.int","conf.int.plot") ,file_type="nex", package=NULL, outgroup=NULL,
-                             param.file.name=NULL, burninfrac=0, max.trees=1000,youngestTip=0,timeForwards=F,scaling=1,plot_type="step",...) {
+                             param.file.name=NULL, burninfrac=0, max.trees=1000,fixToDate=F,Date_FUN=Date_FUN,timeForwards=F,scaling=1,plot_type="step",...) {
 
   require(ape)
+  if(fixToDate){
+    if(missing(Date_FUN)) stop("fixing to a date requires a date function")
+  }
   if(is.character(trees))
   {
     if (file_type=="nex")  
@@ -90,13 +96,13 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
   
   index.range <- c(floor(burninfrac*length(trs)+1), length(trs))
   if (diff(index.range) >= max.trees) {
-    index.seq <- seq(floor(burninfrac*length(trs)+1), length(trs),
-                     length.out=max.trees)
+    index.seq <- round(seq(floor(burninfrac*length(trs)+1), length(trs),
+                     length.out=max.trees))
   } else {
     index.seq <- floor(burninfrac*length(trs)+1):length(trs)
   }
   if(is.null(outgroup)) {
-    rooted.trs <- trs
+    rooted.trs <- trs[index.seq]
   } else {
     rooted.trs <- lapply(index.seq, function (i){
       rooted <- root(trs[[i]], outgroup=outgroup, resolve.root=TRUE)  # MrBayes trees are already rooted
@@ -105,38 +111,69 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
     })
   }
   
-  if(!is.null(param.file.name))
-  {
-    pars <- read.table(param.file.name, header=TRUE, skip=1)
-    if(package=="BEAST")
-    {
-      clock.rates <- pars$clock.rate[index.seq]
-    } else if (package=="MrBayes"){
-      clock.rates <- pars$Clockrate[index.seq]  		
-    } else {
-      stop("parameter file package should be specified")
-    }
-  } else {
-    clock.rates=rep(NA,length(rooted.trs))
-  }
+#   if(!is.null(param.file.name))
+#   {
+#     pars <- read.table(param.file.name, header=TRUE, skip=1)
+#     if(package=="BEAST")
+#     {
+#       clock.rates <- pars$clock.rate[index.seq]
+#     } else if (package=="MrBayes"){
+#       clock.rates <- pars$Clockrate[index.seq]  		
+#     } else {
+#       stop("parameter file package should be specified")
+#     }
+#   } else {
+#     clock.rates=rep(NA,length(rooted.trs))
+#   }
+#   
 
   #i=1
+  #plot(x)
+  #getNodeAges(x,from_past=F)
+  #plot(sort(getNodeAges(x,from_past=T)))
+# i=1
   skyline_list<-lapply(1:length(rooted.trs), function (i) {
     x <- rooted.trs[[i]]
     if(class(x)!="phylo") stop(paste("object",i,"is not a phylo object"))    
     if(!is.binary.tree(x)) stop(paste("tree",i,"is not binary, with unknown consequences"))    
-    class(x) <- "datedPhylo"
-    sk <- skyline(x)
+    x_dated=x
+    class(x_dated) <- "datedPhylo"
+    #class(x) <- "phylo"
+    sk <- skyline(x_dated)
     
-    if(timeForwards)
-    {
-      sk$time = youngestTip + scaling*(sk$time - max(sk$time))
+    
+#     getNodeAges(rooted.trs[[i]])
+    if(fixToDate){
+      n=length(x$tip.label)
+      node_ages=getNodeAges(x)
+      
+      tip_time <- rev(range(node_ages[1:n]))
+      
+#       tree_time <- c(max(sk$time), #the tree age of the root
+#         0) #the tree age of the youngest tip
+      
+      real_time <- range(Date_FUN(x$tip.label)) #the dates of the root and tip, respectively
+      
+#       m=(real_time[2]-real_time[1])/(tree_time[2]-tree_time[1]) #the gradient between tree time and the time specified on the tips
+      m=(real_time[2]-real_time[1])/(tip_time[2]-tip_time[1]) #the gradient between tree time and the time specified on the tips
+
+      sk$time<-real_time[2]+m*sk$time
+#       sk$time<-real_time[1]
+#         m*(sk$time-tip_time[1])
     } else {
-      sk$time = scaling*(sk$time) + youngestTip
+      if(timeForwards)
+      {
+        sk$time = scaling*(max(sk$time) - sk$time)
+      } else {
+        sk$time = scaling*(sk$time)
+      }
     }
     
     
-    list(Skyline=sk, MolClockRate=clock.rates[i])
+    
+    
+    #list(Skyline=sk, MolClockRate=clock.rates[i])
+    list(Skyline=sk)
   })
   
   if(output_type=="list")
@@ -228,10 +265,12 @@ conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),...)
 #' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
 #' @examples end_times<-as.numeric(rownames(conf.int))
 #' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
-#' @examples draw_skyline_smooth(end_times,pop_size=conf.int[,1],col=1,epsilon=0.1)
+#' @examples skyline_smooth(end_times,pop_size=conf.int[,1],col=1,epsilon=0.1)
 
-skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
+
+skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),draw=T,...)
 {
+  if(diff(range(end_times))<epsilon) stop("epsilon is bigger than the entire skyline range")
   if(epsilon==0)
   {
     end_times_out<-end_times
@@ -247,7 +286,7 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
     pop_size_out=numeric(0)
     intervals=c(0,diff(end_times)) #interval sizes
     
-    cbind(1:length(end_times), end_times,intervals,pop_size)
+    #cbind(1:length(end_times), end_times,intervals,pop_size)
   
     i=len
     while(i>=1)
@@ -268,6 +307,9 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
       }
       
       end_times_out<-c(end_times[max(combine_vec)],end_times_out)
+#       these_pop_sizes=pop_size[combine_vec]
+#       these_pop_sizes=these_pop_sizes[these_pop_sizes!=0]
+      #pop_size_out<-c(harmonic(these_pop_sizes),pop_size_out)
       pop_size_out<-c(harmonic(pop_size[combine_vec]),pop_size_out)
       
       last_combine_vec=combine_vec #in case the last run of intervals don't add up to >epsilon and you need to combine with the previous run of intervals
@@ -275,8 +317,11 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
       i=i-1
     }
   }
-  
-  draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,...)
+  if(draw){
+    draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,...)
+  } else {
+    list(end_times=end_times_out,pop_size=pop_size_out)
+  }
 }
 
 

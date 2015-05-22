@@ -4,7 +4,8 @@
 \alias{skyline_smooth}
 \title{skyline_smooth}
 \usage{
-skyline_smooth(end_times, pop_size, epsilon = 0, plot_type = c("step"), ...)
+skyline_smooth(end_times, pop_size, epsilon = 0, plot_type = c("step"),
+  draw = T, ...)
 }
 \value{
 Draws the lines of a skyline, but with a minimum time interval specified by epsilon

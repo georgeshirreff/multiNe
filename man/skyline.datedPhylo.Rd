@@ -4,7 +4,7 @@
 \alias{skyline.datedPhylo}
 \title{skyline.datedPhylo}
 \usage{
-\method{skyline}{datedPhylo}(tr)
+skyline.datedPhylo(tr)
 }
 \description{
 Like skyline() from ape but takes the class "datedPhylo"
