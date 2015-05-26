@@ -19,27 +19,27 @@ Phylos2Skylines_anchor(trees, output_type = c("list", "matrices", "master",
 
 \item{output_type}{master (a master table with the rows being every unique time point across all trees, with time specified in the row name, and each column is a different tree)}
 
-\item{output_type}{conf.int (a matrix with each row being each unique event time and the columns being the 50%, 2.5% and 97.5% percentiles respectively)}
+\item{output_type}{conf.int (a matrix with each row being each unique event time and the columns being the 50\%, 2.5\% and 97.5\% percentiles respectively)}
 
 \item{output_type}{conf.int.plot (outputs the conf.int table but also plots them)}
 
-\item{file_type:}{the format of the tree file}
+\item{file_type}{the format of the tree file}
 
-\item{outgroup:}{specify if the tree should be re-rooted at this node and then this node removed.}
+\item{outgroup}{specify if the tree should be re-rooted at this node and then this node removed.}
 
-\item{package:}{what package has been used to create the param file (BEAST, MrBayes)}
+\item{package}{what package has been used to create the param file (BEAST, MrBayes)}
 
-\item{param.file.name:}{if there is a parameter output file, specify it here so the clock rate can be fetched}
+\item{param.file.name}{if there is a parameter output file, specify it here so the clock rate can be fetched}
 
-\item{burninfrac:}{what proportion of trees should be discarded from the multiPhylo object}
+\item{burninfrac}{what proportion of trees should be discarded from the multiPhylo object}
 
-\item{max.trees:}{the maximum number of trees which will be sampled. If more exist, they are taken from the total at regular intervals.}
+\item{max.trees}{the maximum number of trees which will be sampled. If more exist, they are taken from the total at regular intervals.}
 
-\item{youngestTip:}{the age of the youngest tip}
+\item{youngestTip}{the age of the youngest tip}
 
-\item{timeForward:}{if TRUE the times of coalescent events wil be specified forwards, otherwise backwards.}
+\item{timeForward}{if TRUE the times of coalescent events wil be specified forwards, otherwise backwards.}
 
-\item{scaling:}{a scaling factor for the branch lengths, if the branch lengths are not on the same scale as time.}
+\item{scaling}{a scaling factor for the branch lengths, if the branch lengths are not on the same scale as time.}
 }
 \description{
 Converts a (multi)Phylo object to a series of skylines
