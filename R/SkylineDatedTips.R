@@ -3,22 +3,19 @@
 #' @description tips, i.e. sequences were sampled sequentially in time.
 #' @description The likelihood function is based on Equations 3 and 4 in
 #' @description Drummond et al (2005) Mol. Biol. Evol.
-#' 
+#'
+#' @param tr: a phylogeny of class "datedPhylo"
+#'
+#' @return A datedCI object with coalescent intervals in units of substitutions.
+#'
 #' @author Lucy Mengqi Li <mengqi.li09@@imperial.ac.uk>
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
 #' @examples coalescent.intervals.datedPhylo(trees)
 
 coalescent.intervals.datedPhylo <- function (tr) {
-  #
-  # Find the coalescent intervals of a tree in units of substitutions
-  #
-  # Input:
-  #   tr - a phylogeny of class 'datedPhylo'
-  #
-  # Returns a datedCI object with coalescent intervals
-  #
-#   if (!inherits(tr, "datedPhylo")) 
+
+#   if (!inherits(tr, "datedPhylo"))
 #     stop("object \"tr\" is not of class \"datedPhylo\"")
   n <- length(tr$tip.label)
   e1 <- tr$edge[, 1]
@@ -37,10 +34,10 @@ coalescent.intervals.datedPhylo <- function (tr) {
     }
     cbind(d, c(i, ends))
   })
-  
+
   positions <- do.call(rbind, depths)[, 1]
   max.depth <- max(positions) #longest path from root to tip in the tree
-  adjusted.times <- unlist(lapply(depths, function (x) { 
+  adjusted.times <- unlist(lapply(depths, function (x) {
     max.depth - max(x[, 1]) + x[, 1]
   }))
   is.coalescent <- unlist(lapply(depths, function (x) {
@@ -64,7 +61,11 @@ coalescent.intervals.datedPhylo <- function (tr) {
 
 #' @title skyline.with.sampling
 #' @description For a given datedCI object return the skyline for each coalescent interval
-#' 
+#'
+#' @param ci: a datedCI object
+#'
+#' @return An object of class datedSkyline
+#'
 #' @author Lucy Mengqi Li <mengqi.li09@@imperial.ac.uk>
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
@@ -72,13 +73,6 @@ coalescent.intervals.datedPhylo <- function (tr) {
 #' @examples skyline.with.sampling(ci)
 
 skyline.with.sampling <- function (ci) {
-  #
-  # For a given datedCI object return the skyline for each coalescent interval
-  #
-  # Inputs:
-  #   ci - datedCI object
-  # Returns an object of class 'datedSkyline'
-  #
   coal.which <- which(ci$is.coalescent)
   diffs <- diff(c(0, coal.which))
   coal.interval.lengths <- ci$interval.length
@@ -87,7 +81,7 @@ skyline.with.sampling <- function (ci) {
     ltt <- ci$lineages[sub]
     interval.lengths <- ci$interval.length[sub]
     sk <- sum(choose(ltt, 2) * interval.lengths)
-    L <- log(choose(ltt[length(ltt)], 2)/sk) - 
+    L <- log(choose(ltt[length(ltt)], 2)/sk) -
       sum(choose(ltt, 2)/sk*interval.lengths) # likelihood
     c(sk, L, sum(interval.lengths))
   })
@@ -104,7 +98,11 @@ skyline.with.sampling <- function (ci) {
 
 #' @title skyline.datedPhylo
 #' @description Like skyline() from ape but takes the class "datedPhylo"
-#' 
+#'
+#' @param An object of class "datedPhylo"
+#'
+#' @return An object of class "skyline"
+#'
 #' @author Lucy Mengqi Li <mengqi.li09@@imperial.ac.uk>
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
@@ -120,25 +118,25 @@ skyline.datedPhylo <- function (tr) {
 
 # #' @title Phylos2Skylines
 # #' @description Converts a (multi)Phylo object to a series of skylines
-# #' @description For a set of unrooted trees, remove the burnin trees and root the rest at 
+# #' @description For a set of unrooted trees, remove the burnin trees and root the rest at
 # #' @description the root.node. Limit the total number of output trees to be less than max.trees
 # #' @description Requires input from posterior sample of trees and parameters e.g. BEAST
-# #' 
+# #'
 # #' @author Lucy Mengqi Li <mengqi.li09@@imperial.ac.uk>
 # #' @examples library(ape)
 # #' @examples trees <- rmtree(N=5,n=20)
 # #' @examples Phylos2Skylines(trees)
-# #' 
-# 
+# #'
+#
 # Phylos2Skylines <- function (trees.file.name, nex=TRUE, root.node=NULL,
 #                              param.file.name, burninfrac=0.5, max.trees=1000) {
 #   #
-#   # For a set of unrooted trees, remove the burnin trees and root the rest at 
+#   # For a set of unrooted trees, remove the burnin trees and root the rest at
 #   # the root.node. Limit the total number of output trees to be less than max.trees
 #   #
 #   if (nex)  trs <- read.nexus(trees.file.name)
 #   else trs <- read.tree(trees.file.name)
-#   
+#
 #   index.range <- c(floor(burninfrac*length(trs)+1), length(trs))
 #   if (diff(index.range) >= max.trees) {
 #     index.seq <- seq(floor(burninfrac*length(trs)+1), length(trs),
@@ -155,7 +153,7 @@ skyline.datedPhylo <- function (tr) {
 #       #drop.tip(trs[[i]], root.node, FALSE)
 #     })
 #   }
-#   
+#
 #   pars <- read.table(param.file.name, header=TRUE, skip=1)
 #   clock.rates <- pars$Clockrate[index.seq]
 #   lapply(1:length(rooted.trs), function (i) {

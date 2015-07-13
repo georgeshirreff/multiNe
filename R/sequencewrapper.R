@@ -1,11 +1,11 @@
 require(phylosim)
 #' @title sequence.wrapper
 #' @description A wrapper function for the sequence simulator programs ms, seqgen, simSeq, and PhyloSim.
-#' 
+#'
 #' @author Rebecca Harris <rbharris@@uw.edu>
-#' 
+#'
 #' @return Writes out sequences in phylip format to your working directory.
-#' 
+#'
 #' @param n number of sequences
 #' @param L length of sequence
 #' @param method choice of sequence simulation
@@ -36,11 +36,11 @@ sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree =
 		simseq <- ms(nsam = n, nreps = 1, opts = ms.args)
 		ms2nuc(simseq, file = outfile)
 		print(paste("Output written to ", outfile, sep = ""))
-	} 
-	
+	}
+
 	# GEN.SEQ.HKY METHOD 2
 	if (method == "gen.seq.HKY"){
-		if (is.null(tree)) 
+		if (is.null(tree))
 			stop("Error: No tree given.")
 		pi.n <- eq.prob(pi.n, 4)
 		simseq <- gen.seq.HKY(tree, pi.n, kappa = 1, L, anc.seq = ancseq, rate.scale = rate.in)
@@ -53,7 +53,7 @@ sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree =
 		simseq <- gen.seq.SNP(tree, pi.n, L, anc.seq = ancseq)
 		write(simseq, outfile)
 	}
-	
+
 	# simSeq METHOD 4
 	if (method == "simSeq"){
 		if (is.null(tree)) print("Error: No tree given.")
@@ -69,7 +69,7 @@ sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree =
 				ancseq <- NucleotideSequence(string = ancseq)
 			}
 			if (is.null(ancseq)) {
-				ancseq <- NucleotideSequence(length = L, processes = list(list(JC69()))) 
+				ancseq <- NucleotideSequence(length = L, processes = list(list(JC69())))
 				ancseq$states <- c("A", "G", "C", "T")
 			}
 			simseq <- PhyloSim(phylo = tree, root.seq = ancseq)
@@ -82,11 +82,11 @@ sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree =
 
 #' @title ms2nuc
 #' @description Converts output of ms2ms to nucleotides.
-#' 
+#'
 #' @author Rebecca Harris <rbharris@@uw.edu>
-#' 
+#'
 #' @return A table.
-#' 
+#'
 ms2nuc <- function(ms.res, fileout){
 	if (length(grep("positions", ms.res)) == 0)
 		print("No segregating sites. Reexecute loop or increase theta.")
@@ -95,16 +95,16 @@ ms2nuc <- function(ms.res, fileout){
 		nn <- length(ms.res)
 		out <- cbind(paste("s", 1:nn, sep = ""), ms.res)
 		write.table(out, fileout, quote = FALSE, row.names = FALSE, col.names = c(nn, nchar(ms.res[1])))
-	}	
+	}
 }
 
 #' @title eq.prob
-#' @description Checks that appropriate equilibrium probabilities are specified, otherwise specifies equal probabilities. 
-#' 
+#' @description Checks that appropriate equilibrium probabilities are specified, otherwise specifies equal probabilities.
+#'
 #' @author Rebecca Harris <rbharris@@uw.edu>
-#' 
+#'
 #' @return A vector of pi values.
-#' 
+#'
 eq.prob <- function(pi = NULL, n.prob = NULL){
 	if (is.null(pi)) {
 		pi <- rep(1/n.prob, n.prob)
@@ -118,11 +118,11 @@ eq.prob <- function(pi = NULL, n.prob = NULL){
 
 #' @title phang2nuc
 #' @description Converts output of phangorn to nucleotides.
-#' 
+#'
 #' @author Rebecca Harris <rbharris@@uw.edu>
-#' 
-#' @return 
-#' 
+#'
+#' @return No output.
+#'
 phang2nuc <- function(sq = phang.seq, file = "test.out"){
 	out <- NULL
 	for (i in 1:length(sq)){
@@ -143,11 +143,11 @@ phang2nuc <- function(sq = phang.seq, file = "test.out"){
 
 #' @title phylosim2nuc
 #' @description Converts PhyloSim output to phylip format.
-#' 
+#'
 #' @author Rebecca Harris <rbharris@@uw.edu>
-#' 
+#'
 #' @return A table.
-#' 
+#'
 phylosim2nuc <- function(align = sim, file = "test.out"){
 	tip.seqs <- grep("^t.*", rownames(align$alignment))
 	out <- apply(align $alignment[tip.seqs,], 1, function(x) paste(x, collapse = ""))
