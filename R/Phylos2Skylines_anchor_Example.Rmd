@@ -1,0 +1,75 @@
+---
+title: "Using Phylos2Skylines_anchor"
+output: html_document
+---
+
+This is a guide to using the function Phylos2Skylines_anchor to establish confidence intervals from a posterior sample of trees, such as produced by a package like BEAST or MrBayes.
+
+Start by loading the multiNe package, and making an example trees file.
+
+```{r}
+require(multiNe)
+require(ape)
+trees<-rmtree(N = 10,n=10,tip.label=paste("t",1:10,"_",1:10,sep=""))
+write.nexus(trees,file="my_tree_file.nexus")
+```
+
+You can access your trees in one of two ways. Either you can get the function itself to read them in for you. 
+
+```{r}
+Phylos2Skylines_anchor(trees = "my_tree_file.nexus",file_type="nex",output_type="list")
+```
+
+Or you can read them into R beforehand as a multiPhylo object e.g. using 
+
+```{r}
+trees<-read.nexus(file="my_tree_file.nexus") 
+Phylos2Skylines_anchor(trees,output_type="list")
+```
+
+The default output_type="list" will produce a list, one for each tree, of skyline objects
+
+The output_type="matrices" will produce two tables, with the columns of the table representing each tree, one (time_mat) with the end times of each coalescent interval, and one (pop_mat) with the effective population size during that interval, and each row representing a coalescent event in that tree. 
+
+```{r}
+Phylos2Skylines_anchor(trees,output_type="matrices")
+```
+
+The output_type="master" will produce a single master table, with the columns of the table representing each tree, one (time_mat) with the end times of each coalescent interval, and one (pop_mat) with the effective population size during that interval, and each row representing a coalescent event in one of the trees. 
+
+```{r}
+Phylos2Skylines_anchor(trees,output_type = "master")
+```
+
+The most functional option, output_type="conf.int.plot" will do the above and plot a figure with the median skyline and its confidence intervals. It will also return a matrix with 4 columns representing the time, median, lower and upper confidence intervals, respectively. 
+
+```{r}
+conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int.plot")
+```
+
+Finally, the output_type="conf.int" returns this object, but without plotting. 
+
+```{r}
+conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int")
+```
+
+Assuming that the set of trees is raw posterior output, you will presumably want to discard some proportion of the early trees, and this is specified with burninfrac. This can be assessed by examining the accompanying log file in Tracer. 
+
+```{r}
+conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",burninfrac=0.1)
+```
+
+If the branch lengths of the trees are in substitutions per site, and you want the skyline plot to be in units of time, you may wish to scale them according to a clock rate, which is specified with "scaling".
+
+```{r}
+conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",burninfrac=0.1,scaling=0.011)
+```
+
+If the names of the tips of the tree contain the date, then the skyline can be directly fixed to those dates. This is done by setting fixToDate=TRUE, and then by specifying a function which will return the dates as numeric values. In this example, this assumes that the tips are labelled as follows, as an example: t1_2001.2, t2_2005.3, t3_2009.98 etc. 
+
+```{r}
+Date_FUN = function(label) as.numeric(gsub(".*_([.0-9]+)","\\1",label))
+Date_FUN(trees[[1]]$tip.label) #this should return a vector of tip dates
+conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",fixToDate = T,Date_FUN = Date_FUN)
+```
+

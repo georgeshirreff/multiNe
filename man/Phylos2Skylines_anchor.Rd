@@ -19,7 +19,7 @@ Phylos2Skylines_anchor(trees, output_type = c("list", "matrices", "master",
 
 \item{output_type}{master (a master table with the rows being every unique time point across all trees, with time specified in the row name, and each column is a different tree)}
 
-\item{output_type}{conf.int (a matrix with each row being each unique event time and the columns being the 50%, 2.5% and 97.5% percentiles respectively)}
+\item{output_type}{conf.int (a matrix with each row being each unique event time and the columns being the 50th, 2.5th and 97.5th percentiles respectively)}
 
 \item{output_type}{conf.int.plot (outputs the conf.int table but also plots them)}
 

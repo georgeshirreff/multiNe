@@ -48,7 +48,7 @@ getNodeAges<-function(x,from_past=F)
 #' @param output_type list (a list of skyline objects)
 #' @param output_type matrices (two matrices, each with a column for each tree and a row for each coalescent event in the tree. One matrix specifies the population size and one specifies the time at the end of the interval)
 #' @param output_type master (a master table with the rows being every unique time point across all trees, with time specified in the row name, and each column is a different tree)
-#' @param output_type conf.int (a matrix with each row being each unique event time and the columns being the 50%, 2.5% and 97.5% percentiles respectively)
+#' @param output_type conf.int (a matrix with each row being each unique event time and the columns being the 50th, 2.5th and 97.5th percentiles respectively)
 #' @param output_type conf.int.plot (outputs the conf.int table but also plots them)
 #' @param file_type: the format of the tree file
 #' @param package: what package has been used to create the param file (BEAST, MrBayes)
@@ -80,10 +80,11 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
     if(missing(Date_FUN)) stop("fixing to a date requires a date function")
     if(!missing(timeForwards)) print("timeForwards is ignored if fixToDate=TRUE")
   }
+
   if(is.character(trees))
   {
     if (file_type=="nex")
-      trs <- read.nexus(trees)
+      trs <- read.nexus(file=trees)
     else if (file_type=="nwk")
       trs <- read.tree(trees)
   } else {
