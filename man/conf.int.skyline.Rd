@@ -4,7 +4,8 @@
 \alias{conf.int.skyline}
 \title{conf.int.skyline}
 \usage{
-conf.int.skyline(conf.int, epsilon = 0, plot_type = c("step"), ...)
+conf.int.skyline(conf.int, epsilon = 0, plot_type = c("step"),
+  x_lab = x_lab, ...)
 }
 \arguments{
 \item{conf.int:}{this type of output from Phylos2Skylines_anchor}
