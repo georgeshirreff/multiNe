@@ -1,4 +1,6 @@
 require(phylosim)
+
+
 #' @title sequence.wrapper
 #' @description A wrapper function for the sequence simulator programs ms, seqgen, simSeq, and PhyloSim.
 #'

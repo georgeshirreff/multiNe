@@ -3,9 +3,13 @@ title: "Using Phylos2Skylines_anchor"
 output: html_document
 ---
 
-This is a guide to using the function Phylos2Skylines_anchor to establish confidence intervals from a posterior sample of trees, such as produced by a package like BEAST or MrBayes.
+This vignette describes the functions in the multiNe package which allow coalescent analysis of phylogenetic objects, along with auxiliary functions such as plotting. The basic coalescent analysis extends that found in the ape package but allows for phylogenies with heterochronous dated tips. Coalescent theory states that the rate at which the lineages in a phylogeny coalesce is inversely proportional to the effective population size. 
 
-Start by loading the multiNe package, and making an example trees file.
+The most important function for this is 'Phylos2Skylines_anchor'. This takes as its first argument a multiPhylo object, which is effectively a list of phylo objects, each of which is a tree. This type of object is the typical result of reading in the output from a program which does Bayesian inference, such as BEAST or MrBayes.
+
+Alternatively, a multiPhylo object can be simulated using rmtree in the ape package. For future use, write these into a nexus file. 
+
+Start by loading the multiNe package, and making an example trees file. This can be written to a nexus file. 
 
 ```{r}
 require(multiNe)
@@ -73,3 +77,35 @@ Date_FUN(trees[[1]]$tip.label) #this should return a vector of tip dates
 conf_int_obj<-Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",fixToDate = T,Date_FUN = Date_FUN)
 ```
 
+If the multiPhylo object or the file containing the trees is very large, it may be very time-consuming to read in and perform the coalescent analysis on them. The argument max_trees allows only a limited number to be used, which is by default 1000. The trees are then selected at regular intervals from the multiPhylo object. 
+
+```{r}
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot")
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",max.trees=5)
+```
+
+Skyline data are usually presented by a step function, consistenting of only vertical and horizontal lines, implying that for a given period the best estimate for the effective population size is a certain value. For some analyses, it may be preferred that points on the graph are joined by straight sloping lines, implying that the effective population size during this period changes in a regular fashion. 
+
+```{r}
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",plot_type="step")
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",plot_type="linear")
+```
+
+Another useful plotting feature is the smoothing capability when using output_type="conf.int.plot". If the value 'epsilon' is specified, this means that no time interval in the plot will be shorter than that value (default epsilon=0). This is achieved by combining neighbouring intervals until the condition is met. 
+
+```{r}
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",epsilon=0)
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",epsilon=0.01)
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",epsilon=0.05)
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",epsilon=0.1)
+Phylos2Skylines_anchor(trees,output_type = "conf.int.plot",epsilon=0.5)
+```
+
+===============================================================
+
+An additional useful feature of this function is getNodeAges. This returns a vector with the ages of each of the tips, root and internal nodes (in that order). The tip ages in the vector are labelled with the name of the tip; the root node is named "root"; and the internal nodes are named <NA>. The argument 'from_past' determines whether the ages are relative to the root or the youngest tip: the default is the latter. 
+
+```{r}
+getNodeAges(trees[[1]],from_past=F)
+getNodeAges(trees[[1]],from_past=T)
+```

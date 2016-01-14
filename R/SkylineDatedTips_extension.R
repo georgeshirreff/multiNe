@@ -73,7 +73,7 @@ getNodeAges<-function(x,from_past=F)
 #skyline_conf.int<-Phylos2Skylines_anchor(trees=trees,burninfrac=0,max.trees=1000,Date_FUN=Date_FUN,output_type = "conf.int.plot",fixToDate = T,timeForwards=T)
 
 Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","master","conf.int","conf.int.plot") ,file_type="nex", package=NULL, outgroup=NULL,
-                             param.file.name=NULL, burninfrac=0, max.trees=1000,fixToDate=F,Date_FUN=Date_FUN,timeForwards=F,scaling=1,plot_type="step",...) {
+                             param.file.name=NULL, burninfrac=0, max.trees=1000,fixToDate=F,Date_FUN=Date_FUN,timeForwards=F,scaling=1,plot_type="step",epsilon=0,x_lab="Time",...) {
 
   require(ape)
   if(fixToDate){
@@ -193,6 +193,9 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
     return(list(time_mat=time_mat,pop_mat=pop_mat))
   }
 
+
+  ###Make master time and population objects
+
   treenum_mat<-matrix(1:length(skyline_list),nrow=nrow(time_mat),ncol=length(skyline_list),byrow=T)
   posnum_mat<-matrix(1:nrow(time_mat),nrow=nrow(time_mat),ncol=length(skyline_list),byrow=F)
 
@@ -228,8 +231,7 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
 
   if(output_type=="conf.int.plot")
   {
-    #plot_type="step"
-    conf.int.skyline(conf.int_mat,plot_type=plot_type,...)
+    conf.int.skyline(conf.int_mat,plot_type=plot_type,epsilon=epsilon,x_lab=x_lab,...)
     return(conf.int_mat)
   }
 
@@ -251,48 +253,17 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
 #' @examples trees <- rmtree(N=5,n=20)
 #' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
 
-conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),...)
+conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),x_lab=x_lab,...)
 {
   end_times<-conf.int[,1]
-  plot(type="n",x=range(end_times),y=range(conf.int[,-1]),ylab=expression(N[e]*tau),cex.lab=1,cex.axis=1,...)
+
+  plot(type="n",x=range(end_times),y=range(conf.int[,-1]),xlab=x_lab,ylab=expression(N[e]*tau),cex.lab=1,cex.axis=1,...)
 
   skyline_smooth(end_times,pop_size=conf.int[,2],col=1,epsilon=epsilon,plot_type=plot_type,...)
   skyline_smooth(end_times,pop_size=conf.int[,3],col=2,epsilon=epsilon,plot_type=plot_type,...)
   skyline_smooth(end_times,pop_size=conf.int[,4],col=2,epsilon=epsilon,plot_type=plot_type,...)
 }
 
-
-#' @title draw_skyline
-#' @description Draws a classic skyline onto a plot
-#'
-#' @author George Shirreff <georgeshirreff@@gmail.com>
-#'
-#' @return Draws the lines of a skyline (step) or INLA (piece-wise linear)
-#'
-#' @param end_times: the times at the end of every interval in the skyline.
-#' @param pop_size: the effective population size at that time point.
-#' @param plot_type: choose between "step", where adjacent points on the skyline are joined by a vertical and a horizontal line, and "linear", where adjacent points on the skyline are joined by a single sloping straight line.
-#'
-#' @examples library(ape)
-#' @examples trees <- rmtree(N=5,n=20)
-#' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
-#' @examples end_times<-as.numeric(rownames(conf.int))
-#' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
-#' @examples draw_skyline(end_times,pop_size=conf.int[,1],col=1)
-
-draw_skyline<-function(end_times,pop_size,plot_type=c("linear","step"),...)
-{
-  len<-length(pop_size)
-  if(length(end_times)!=len) stop("vectors are different lengths")
-
-  if(plot_type=="step")
-  {
-    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],code=0,...)
-    arrows(x0=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
-  } else if (plot_type=="linear") {
-    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
-  }
-}
 
 
 #' @title skyline_smooth
@@ -314,7 +285,7 @@ draw_skyline<-function(end_times,pop_size,plot_type=c("linear","step"),...)
 #' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
 #' @examples skyline_smooth(end_times,pop_size=conf.int[,1],col=1,epsilon=0.1)
 
-skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),draw=T,...)
+skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
 {
   if(diff(range(end_times))<epsilon) stop("epsilon is bigger than the entire skyline range")
   if(epsilon==0)
@@ -363,11 +334,40 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),draw=T
       i=i-1
     }
   }
-  if(draw){
-    draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,...)
-  } else {
-    list(end_times=end_times_out,pop_size=pop_size_out)
-  }
+  draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,...)
 }
 
+
+
+#' @title draw_skyline
+#' @description Draws a classic skyline onto a plot
+#'
+#' @author George Shirreff <georgeshirreff@@gmail.com>
+#'
+#' @return Draws the lines of a skyline (step) or INLA (piece-wise linear)
+#'
+#' @param end_times: the times at the end of every interval in the skyline.
+#' @param pop_size: the effective population size at that time point.
+#' @param plot_type: choose between "step", where adjacent points on the skyline are joined by a vertical and a horizontal line, and "linear", where adjacent points on the skyline are joined by a single sloping straight line.
+#'
+#' @examples library(ape)
+#' @examples trees <- rmtree(N=5,n=20)
+#' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
+#' @examples end_times<-as.numeric(rownames(conf.int))
+#' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
+#' @examples draw_skyline(end_times,pop_size=conf.int[,1],col=1)
+
+draw_skyline<-function(end_times,pop_size,plot_type=c("linear","step"),...)
+{
+  len<-length(pop_size)
+  if(length(end_times)!=len) stop("vectors are different lengths")
+
+  if(plot_type=="step")
+  {
+    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],code=0,...)
+    arrows(x0=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
+  } else if (plot_type=="linear") {
+    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
+  }
+}
 

@@ -6,12 +6,14 @@ Authors@R: c( person("George", "Shirreff",email="georgeshirreff@gmail.com", role
               person(given="Christine", family="Ewers", email="ewers.christine@@gmail.com", role = c("aut")),
               person(given="Rebecca", family="Harris", email="rbharris@@uw.edu", role = c("aut")))
 Description: Uses multiple methods to estimate the effective population size
-Depends: R (>= 3.1.2)
+Depends:
+    R (>= 3.1.2)
 License: What license is it under?
 LazyData: true
-Imports: ape,
+Imports:
+    ape,
     adegenet,
     phyclust,
     phangorn,
     INLA
-
+RoxygenNote: 5.0.0
