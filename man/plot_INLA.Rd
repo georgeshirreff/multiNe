@@ -10,6 +10,8 @@ plot_INLA(INLA_out, traj = NULL, xlim = NULL, ...)
 \item{INLA_out}{Otput from the inla functions}
 
 \item{traj}{the true trajectory}
+
+\item{xlim}{the limits of the x-axis, as standard in plot()}
 }
 \description{
 Plots the output from the inla functions for Ne

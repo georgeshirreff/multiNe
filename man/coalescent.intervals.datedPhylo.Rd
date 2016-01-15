@@ -4,7 +4,7 @@
 \alias{coalescent.intervals.datedPhylo}
 \title{coalescent.intervals.datedPhylo}
 \usage{
-coalescent.intervals.datedPhylo(tr)
+\method{coalescent.intervals}{datedPhylo}(tr)
 }
 \arguments{
 \item{tr:}{a phylogeny of class "datedPhylo"}

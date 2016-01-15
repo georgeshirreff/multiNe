@@ -4,7 +4,8 @@
 \alias{skyline_smooth}
 \title{skyline_smooth}
 \usage{
-skyline_smooth(end_times, pop_size, epsilon = 0, plot_type = c("step"), ...)
+skyline_smooth(end_times, pop_size, epsilon = 0, plot_type = c("step"),
+  col = 4)
 }
 \arguments{
 \item{epsilon:}{a smoothing parameter. Any time intervals smaller than this value will be joined with adjacent bins until all are wider than this.}

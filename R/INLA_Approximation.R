@@ -1,6 +1,6 @@
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
-#'@param coal.factor is a vector with coalescent times in increasing order 
+#'@param coal.factor is a vector with coalescent times in increasing order
 #'@param s sampling times and coalescent times in increasing order
 #'@param event and indicator vector with 1 for coalescent times and 0 for sampling times that correspond to the s vector
 #'@param lengthout number of grid points
@@ -11,11 +11,11 @@
 #'@param beta TODO
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha = 0.01, 
-          prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL) 
+calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha = 0.01,
+          prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL)
 {
-  
-  if (prec_alpha == 0.01 & prec_beta == 0.01 & !is.null(alpha) & 
+
+  if (prec_alpha == 0.01 & prec_beta == 0.01 & !is.null(alpha) &
         !is.null(beta)) {
     prec_alpha = alpha
     prec_beta = beta
@@ -33,16 +33,16 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
     if (count > 1) {
       points <- s[s > sgrid[j] & s <= sgrid[j + 1]]
       u <- diff(c(sgrid[j], points))
-      event_new <- c(event_new, event[(where):(where + 
+      event_new <- c(event_new, event[(where):(where +
                                                  count - 1)])
       time <- c(time, rep(field[j], count))
-      E.factor <- c(E.factor, coal.factor[where:(where + 
+      E.factor <- c(E.factor, coal.factor[where:(where +
                                                    count - 1)] * u)
       where <- where + count
       if (max(points) < sgrid[j + 1]) {
         event_new <- c(event_new, 0)
         time <- c(time, field[j])
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (sgrid[j + 1] - max(points)))
       }
     }
@@ -50,16 +50,16 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
       event_new <- c(event_new, event[where])
       points <- s[s > sgrid[j] & s <= sgrid[j + 1]]
       if (points == sgrid[j + 1]) {
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (sgrid[j + 1] - sgrid[j]))
         time <- c(time, field[j])
         where <- where + 1
       }
       else {
         event_new <- c(event_new, 0)
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (points - sgrid[j]))
-        E.factor <- c(E.factor, coal.factor[where + 1] * 
+        E.factor <- c(E.factor, coal.factor[where + 1] *
                         (sgrid[j + 1] - points))
         time <- c(time, rep(field[j], 2))
         where <- where + 1
@@ -67,7 +67,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
     }
     if (count == 0) {
       event_new <- c(event_new, 0)
-      E.factor <- c(E.factor, coal.factor[where] * (sgrid[j + 
+      E.factor <- c(E.factor, coal.factor[where] * (sgrid[j +
                                                             1] - sgrid[j]))
       time <- c(time, field[j])
     }
@@ -90,11 +90,11 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
   }
   E.factor2.log = log(E.factor2)
   E.factor2.log[E.factor2 == 0] = E.log.zero
-  data <- list(y = event_new2[-1], event = event_new2[-1], 
+  data <- list(y = event_new2[-1], event = event_new2[-1],
                time = time2[-1], E = E.factor2.log[-1])
-  formula <- y ~ -1 + f(time, model = "rw1", hyper = list(prec = list(param = c(prec_alpha, 
+  formula <- y ~ -1 + f(time, model = "rw1", hyper = list(prec = list(param = c(prec_alpha,
                                                                                 prec_beta))), constr = FALSE)
-  mod4 <- inla(formula, family = "poisson", data = data, offset = E, 
+  mod4 <- inla(formula, family = "poisson", data = data, offset = E,
                control.predictor = list(compute = TRUE))
   return(list(result = mod4, grid = grid, data = data, E = E.factor2.log))
 }
@@ -123,7 +123,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
   E.factor<-0
   where<-1
   for (j in 1:lengthout){
-    count<-sum(s>sgrid[j] & s<=sgrid[j+1]) 
+    count<-sum(s>sgrid[j] & s<=sgrid[j+1])
     if (count>1){
       points<-s[s>sgrid[j] & s<=sgrid[j+1]]
       u<-diff(c(sgrid[j],points))
@@ -156,21 +156,21 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
       E.factor<-c(E.factor,coal.factor[where]*(sgrid[j+1]-sgrid[j]))
       time<-c(time,field[j])
     }
-    
+
   }
   ##Fixing for when there are no observations
   combine<-unique(sort(c(grid[-1],s)))
-  find2<-max(seq(1,length(combine))[combine<=max(s)])  
+  find2<-max(seq(1,length(combine))[combine<=max(s)])
   event<-event[-1]
   time<-time[-1]
   E.factor<-E.factor[-1]
   grid<-c(grid[grid<=max(s)],max(s))
   data<-list(y=event[1:find2],event=event[1:find2],time=time[1:find2],E=log(E.factor[1:find2]))
-  
+
   #  data<-list(y=event[-1],event=event[-1],time=time[-1],E=log(E.factor[-1]))
   formula<-y~-1+f(time,model="rw1",hyper=list(prec = list(param = c(.001, .001))),constr=FALSE)
   mod.moller.constant<-inla(formula,family="poisson",data=data,offset=E,control.predictor=list(compute=TRUE))
-  
+
   return(stan_output(list(result=mod.moller.constant,grid=grid)))
 }
 
@@ -194,18 +194,18 @@ calculate.moller<-function(tree,lengthout,L=1){
    return(result)
  }
 }
- 
+
 #'@title plot_INLA
 #'@description Plots the output from the inla functions for Ne
 #'@param INLA_out Otput from the inla functions
 #'@param traj the true trajectory
-#'@param xlim
+#'@param xlim the limits of the x-axis, as standard in plot()
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
 plot_INLA = function(INLA_out, traj=NULL, xlim=NULL, ...)
 {
   mod = INLA_out$result$summary.random$time
-  
+
   grid = mod$"ID"
   if (is.null(xlim))
   {
@@ -234,7 +234,7 @@ plot_INLA2<-function(result, traj=NULL, xlim=NULL, ...){
   if (is.null(xlim)) {
     xlim = c(max(grid), 0)
   }
-  
+
   plot(grid,result[,2],type="l",lwd=2.5,col="blue",log="y",
        xlab="Time (past to present)",ylab="Scaled Effective Pop. Size",
        xlim=xlim, ylim=c(min(result[grid > min(xlim) & grid < max(xlim),4]),
@@ -269,7 +269,7 @@ plot_INLA3<-function(result, traj=NULL, xlim=NULL, ...){
 stan_output<-function(INLA_out){
   mod = INLA_out$result$summary.random$time
   grid = mod$"ID"
-  
+
   results<-matrix(NA,nrow=length(grid),ncol=4)
   results[,1]<-grid
   results[,4]<-exp(-mod$"0.975quant")
@@ -280,7 +280,7 @@ stan_output<-function(INLA_out){
 
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
-#'@param coal.factor is a vector with coalescent times in increasing order 
+#'@param coal.factor is a vector with coalescent times in increasing order
 #'@param s sampling times and coalescent times in increasing order
 #'@param event and indicator vector with 1 for coalescent times and 0 for sampling times that correspond to the s vector
 #'@param lengthout number of grid points
@@ -291,16 +291,16 @@ stan_output<-function(INLA_out){
 #'@param beta TODO
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
-calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01, 
-                                   prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL) 
+calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01,
+                                   prec_beta = 0.01, E.log.zero = -100, alpha = NULL, beta = NULL)
 {
   stats<-heterochronous.gp.stat(tree)
   args<-gen_INLA_args(coal_times=stats$coal.times, s_times=stats$samp_times, n_sampled=stats$sampled.lineages)
   coal.factor<-args$coal_factor
   s<-args$s
   event<-args$event
-  
-  if (prec_alpha == 0.01 & prec_beta == 0.01 & !is.null(alpha) & 
+
+  if (prec_alpha == 0.01 & prec_beta == 0.01 & !is.null(alpha) &
         !is.null(beta)) {
     prec_alpha = alpha
     prec_beta = beta
@@ -318,16 +318,16 @@ calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01,
     if (count > 1) {
       points <- s[s > sgrid[j] & s <= sgrid[j + 1]]
       u <- diff(c(sgrid[j], points))
-      event_new <- c(event_new, event[(where):(where + 
+      event_new <- c(event_new, event[(where):(where +
                                                  count - 1)])
       time <- c(time, rep(field[j], count))
-      E.factor <- c(E.factor, coal.factor[where:(where + 
+      E.factor <- c(E.factor, coal.factor[where:(where +
                                                    count - 1)] * u)
       where <- where + count
       if (max(points) < sgrid[j + 1]) {
         event_new <- c(event_new, 0)
         time <- c(time, field[j])
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (sgrid[j + 1] - max(points)))
       }
     }
@@ -335,16 +335,16 @@ calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01,
       event_new <- c(event_new, event[where])
       points <- s[s > sgrid[j] & s <= sgrid[j + 1]]
       if (points == sgrid[j + 1]) {
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (sgrid[j + 1] - sgrid[j]))
         time <- c(time, field[j])
         where <- where + 1
       }
       else {
         event_new <- c(event_new, 0)
-        E.factor <- c(E.factor, coal.factor[where] * 
+        E.factor <- c(E.factor, coal.factor[where] *
                         (points - sgrid[j]))
-        E.factor <- c(E.factor, coal.factor[where + 1] * 
+        E.factor <- c(E.factor, coal.factor[where + 1] *
                         (sgrid[j + 1] - points))
         time <- c(time, rep(field[j], 2))
         where <- where + 1
@@ -352,7 +352,7 @@ calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01,
     }
     if (count == 0) {
       event_new <- c(event_new, 0)
-      E.factor <- c(E.factor, coal.factor[where] * (sgrid[j + 
+      E.factor <- c(E.factor, coal.factor[where] * (sgrid[j +
                                                             1] - sgrid[j]))
       time <- c(time, field[j])
     }
@@ -375,11 +375,11 @@ calculate.moller.hetero2<-function (tree, lengthout, prec_alpha = 0.01,
   }
   E.factor2.log = log(E.factor2)
   E.factor2.log[E.factor2 == 0] = E.log.zero
-  data <- list(y = event_new2[-1], event = event_new2[-1], 
+  data <- list(y = event_new2[-1], event = event_new2[-1],
                time = time2[-1], E = E.factor2.log[-1])
-  formula <- y ~ -1 + f(time, model = "rw1", hyper = list(prec = list(param = c(prec_alpha, 
+  formula <- y ~ -1 + f(time, model = "rw1", hyper = list(prec = list(param = c(prec_alpha,
                                                                                 prec_beta))), constr = FALSE)
-  mod4 <- inla(formula, family = "poisson", data = data, offset = E, 
+  mod4 <- inla(formula, family = "poisson", data = data, offset = E,
                control.predictor = list(compute = TRUE))
   return(list(result = mod4, grid = grid, data = data, E = E.factor2.log))
 }

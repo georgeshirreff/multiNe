@@ -22,11 +22,11 @@
 #' @param from_past If FALSE (default) the node ages increase backwards in time, with the most recent tip being zero. If TRUE the root node is zero and the node ages increase towards the tips of the tree.
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
-#' @examples Phylos2Skylines_anchor(trees)
+#' @examples Phy2Sky(trees)
 
 getNodeAges<-function(x,from_past=F)
 {
-  require(phangorn)
+  # require(phangorn)
   nodeAges<-phangorn:::nodeHeight(x)
   names(nodeAges)<-c(x$tip.label,"root",rep(NA,length(nodeAges)-length(x$tip.label)-1))
 
@@ -37,7 +37,7 @@ getNodeAges<-function(x,from_past=F)
   return(nodeAges)
 }
 
-#' @title Phylos2Skylines_anchor
+#' @title Phy2Sky
 #' @description Converts a (multi)Phylo object to a series of skylines
 #' @description For a set of unrooted trees, remove the burnin trees and root the rest at
 #' @description the root.node. Limit the total number of output trees to be less than max.trees
@@ -65,14 +65,14 @@ getNodeAges<-function(x,from_past=F)
 #' @author Lucy Mengqi Li <mengqi.li09@@imperial.ac.uk>, adapted by George Shirreff <georgeshirreff@@gmail.com>
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
-#' @examples Phylos2Skylines_anchor(trees)
+#' @examples Phy2Sky(trees)
 #'
 
-#skyline_list<-Phylos2Skylines_anchor(trees=phylo,output_type="list",burninfrac=burninfrac,max.trees=max.trees,youngestTip=youngestTip,timeForwards=T)
-#conf.int_ES<-Phylos2Skylines_anchor(trees=trees_ES,epsilon=epsilon,output_type = "conf.int.plot",timeForwards=T,fixToDate=T,Date_FUN=Date_FUN,max.trees = 100)
-#skyline_conf.int<-Phylos2Skylines_anchor(trees=trees,burninfrac=0,max.trees=1000,Date_FUN=Date_FUN,output_type = "conf.int.plot",fixToDate = T,timeForwards=T)
+#skyline_list<-Phy2Sky(trees=phylo,output_type="list",burninfrac=burninfrac,max.trees=max.trees,youngestTip=youngestTip,timeForwards=T)
+#conf.int_ES<-Phy2Sky(trees=trees_ES,epsilon=epsilon,output_type = "conf.int.plot",timeForwards=T,fixToDate=T,Date_FUN=Date_FUN,max.trees = 100)
+#skyline_conf.int<-Phy2Sky(trees=trees,burninfrac=0,max.trees=1000,Date_FUN=Date_FUN,output_type = "conf.int.plot",fixToDate = T,timeForwards=T)
 
-Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","master","conf.int","conf.int.plot") ,file_type="nex", package=NULL, outgroup=NULL,
+Phy2Sky <- function (trees, output_type=c("list","matrices","master","conf.int","conf.int.plot") ,file_type="nex", package=NULL, outgroup=NULL,
                              param.file.name=NULL, burninfrac=0, max.trees=1000,fixToDate=F,Date_FUN=Date_FUN,timeForwards=F,scaling=1,plot_type="step",epsilon=0,x_lab="Time",...) {
 
   require(ape)
@@ -214,54 +214,57 @@ Phylos2Skylines_anchor <- function (trees, output_type=c("list","matrices","mast
     master_pop_mat[s+1,treenum_vec[s]]<-pop_mat[posnum_vec[s],treenum_vec[s]]
   }
 
-  rownames(master_pop_mat)<-master_time_vec
+  # rownames(master_pop_mat)<-master_time_vec
   if(output_type=="master")
   {
-    return(cbind(master_time_vec,master_pop_mat))
+    out_temp<-cbind(master_time_vec,master_pop_mat)
+    colnames(out_temp)<-c("Time",paste("Tree",1:ncol(master_pop_mat),sep=""))
+    return(out_temp)
   }
 
   conf.int_mat<-cbind(master_time_vec,t(apply(master_pop_mat,1, function(x) quantile(x,probs=c(0.5,0.025,0.975)))))
   rownames(conf.int_mat)<-NULL
+  colnames(conf.int_mat)[1]<-x_lab
 
   if(output_type=="conf.int")
   {
     return(conf.int_mat)
   }
 
-
   if(output_type=="conf.int.plot")
   {
-    conf.int.skyline(conf.int_mat,plot_type=plot_type,epsilon=epsilon,x_lab=x_lab,...)
-    return(conf.int_mat)
+    conf.int.skyline(conf.int_mat,plot_type=plot_type,epsilon=epsilon,...)
   }
 
-  stop("no output type specified")
+  if(missing(output_type)) stop("no output type specified")
 }
 
+
 #' @title conf.int.skyline
-#' @description Makes a skyline plot from a matrix with medians and confidence intervals as produced by Phylos2Skylines_anchor
+#' @description Makes a skyline plot from a matrix with medians and confidence intervals as produced by Phy2Sky
 #'
 #' @author George Shirreff <georgeshirreff@@gmail.com>
 #'
 #' @return A plot with median in black and confidence intervals in red
 #'
-#' @param conf.int: this type of output from Phylos2Skylines_anchor
+#' @param conf.int: this type of output from Phy2Sky
 #' @param epsilon: a smoothing parameter. Any time intervals smaller than this value will be joined with adjacent bins until all are wider than this.
 #' @param plot_type: choose between "step", where adjacent points on the skyline are joined by a vertical and a horizontal line, and "linear", where adjacent points on the skyline are joined by a single sloping straight line.
 #'
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
-#' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
+#' @examples conf.int<-Phy2Sky(trees,output_type="conf.int")
 
-conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),x_lab=x_lab,...)
+
+conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),...)
 {
   end_times<-conf.int[,1]
 
-  plot(type="n",x=range(end_times),y=range(conf.int[,-1]),xlab=x_lab,ylab=expression(N[e]*tau),cex.lab=1,cex.axis=1,...)
+  plot(type="n",x=range(end_times),y=range(conf.int[,-1]),xlab=colnames(conf.int)[1],ylab=expression(N[e]*tau),cex.lab=1,cex.axis=1,...)
 
-  skyline_smooth(end_times,pop_size=conf.int[,2],col=1,epsilon=epsilon,plot_type=plot_type,...)
-  skyline_smooth(end_times,pop_size=conf.int[,3],col=2,epsilon=epsilon,plot_type=plot_type,...)
-  skyline_smooth(end_times,pop_size=conf.int[,4],col=2,epsilon=epsilon,plot_type=plot_type,...)
+  skyline_smooth(end_times,pop_size=conf.int[,2],col=1,epsilon=epsilon,plot_type=plot_type)
+  skyline_smooth(end_times,pop_size=conf.int[,3],col=2,epsilon=epsilon,plot_type=plot_type)
+  skyline_smooth(end_times,pop_size=conf.int[,4],col=2,epsilon=epsilon,plot_type=plot_type)
 }
 
 
@@ -280,12 +283,12 @@ conf.int.skyline<-function(conf.int,epsilon=0,plot_type=c("step"),x_lab=x_lab,..
 #'
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
-#' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
+#' @examples conf.int<-Phy2Sky(trees,output_type="conf.int")
 #' @examples end_times<-as.numeric(rownames(conf.int))
 #' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
 #' @examples skyline_smooth(end_times,pop_size=conf.int[,1],col=1,epsilon=0.1)
 
-skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
+skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),col=4)
 {
   if(diff(range(end_times))<epsilon) stop("epsilon is bigger than the entire skyline range")
   if(epsilon==0)
@@ -334,7 +337,7 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
       i=i-1
     }
   }
-  draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,...)
+  draw_skyline(end_times_out,pop_size_out,plot_type=plot_type,col=col)
 }
 
 
@@ -352,22 +355,22 @@ skyline_smooth<-function(end_times,pop_size,epsilon=0,plot_type=c("step"),...)
 #'
 #' @examples library(ape)
 #' @examples trees <- rmtree(N=5,n=20)
-#' @examples conf.int<-Phylos2Skylines_anchor(trees,output_type="conf.int")
+#' @examples conf.int<-Phy2Sky(trees,output_type="conf.int")
 #' @examples end_times<-as.numeric(rownames(conf.int))
 #' @examples plot(type="n",x=range(end_times),y=range(conf.int),ylab=expression(N[e]*tau))
 #' @examples draw_skyline(end_times,pop_size=conf.int[,1],col=1)
 
-draw_skyline<-function(end_times,pop_size,plot_type=c("linear","step"),...)
+draw_skyline<-function(end_times,pop_size,plot_type=c("linear","step"),col=1)
 {
   len<-length(pop_size)
   if(length(end_times)!=len) stop("vectors are different lengths")
 
   if(plot_type=="step")
   {
-    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],code=0,...)
-    arrows(x0=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
+    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],code=0,col=col)
+    arrows(x0=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,col=col)
   } else if (plot_type=="linear") {
-    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,...)
+    arrows(x0=end_times[-len],x1=end_times[-1],y0=pop_size[-len],y1=pop_size[-1],code=0,col=col)
   }
 }
 

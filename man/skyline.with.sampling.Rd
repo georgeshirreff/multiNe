@@ -4,7 +4,7 @@
 \alias{skyline.with.sampling}
 \title{skyline.with.sampling}
 \usage{
-skyline.with.sampling(ci)
+\method{skyline}{with.sampling}(ci)
 }
 \arguments{
 \item{ci:}{a datedCI object}

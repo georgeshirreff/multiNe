@@ -1,4 +1,4 @@
-require(phylosim)
+# require(phylosim)
 
 
 #' @title sequence.wrapper
@@ -17,7 +17,6 @@ require(phylosim)
 #'
 #' @examples library(phyclust)
 #' @examples library(phyloseq)
-#' @examples library(phylosim)
 #' @examples sequence.wrapper(n = 10, L = 10, method = "gen.seq.HKY", tree = phylo)
 #'
 sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree = NULL, pi.n = 0.25, kappa = "", outfile = "out", ancseq = NULL, rate.in = 1){
@@ -65,6 +64,7 @@ sequence.wrapper <- function(n = 10, L = 10, method = "", ms.args = NULL, tree =
 	}
 	# PhyloSim METHOD 5
 	if (method == "PhyloSim"){
+	  stop("Package PhyloSim now unfortunately obselete")
 		if  (is.null(tree)) print("Error: No tree given.")
 		else {
 			if (!is.null(ancseq)) {

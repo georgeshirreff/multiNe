@@ -4,7 +4,7 @@
 \alias{draw_skyline}
 \title{draw_skyline}
 \usage{
-draw_skyline(end_times, pop_size, plot_type = c("linear", "step"), ...)
+draw_skyline(end_times, pop_size, plot_type = c("linear", "step"), col = 1)
 }
 \arguments{
 \item{end_times:}{the times at the end of every interval in the skyline.}

@@ -4,7 +4,7 @@
 \alias{skyline.datedPhylo}
 \title{skyline.datedPhylo}
 \usage{
-skyline.datedPhylo(tr)
+\method{skyline}{datedPhylo}(tr)
 }
 \arguments{
 \item{An}{object of class "datedPhylo"}

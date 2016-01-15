@@ -4,11 +4,10 @@
 \alias{conf.int.skyline}
 \title{conf.int.skyline}
 \usage{
-conf.int.skyline(conf.int, epsilon = 0, plot_type = c("step"),
-  x_lab = x_lab, ...)
+conf.int.skyline(conf.int, epsilon = 0, plot_type = c("step"), ...)
 }
 \arguments{
-\item{conf.int:}{this type of output from Phylos2Skylines_anchor}
+\item{conf.int:}{this type of output from Phy2Sky}
 
 \item{epsilon:}{a smoothing parameter. Any time intervals smaller than this value will be joined with adjacent bins until all are wider than this.}
 
@@ -18,7 +17,7 @@ conf.int.skyline(conf.int, epsilon = 0, plot_type = c("step"),
 A plot with median in black and confidence intervals in red
 }
 \description{
-Makes a skyline plot from a matrix with medians and confidence intervals as produced by Phylos2Skylines_anchor
+Makes a skyline plot from a matrix with medians and confidence intervals as produced by Phy2Sky
 }
 \examples{
 library(ape)

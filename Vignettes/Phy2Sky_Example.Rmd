@@ -1,0 +1,121 @@
+---
+title: "Using Phy2Sky"
+output: html_document
+---
+
+This vignette describes the functions in the multiNe package which allow coalescent analysis of phylogenetic objects, along with auxiliary functions such as plotting. The basic coalescent analysis extends that found in the ape package but allows for phylogenies with heterochronous dated tips. Coalescent theory states that the rate at which the lineages in a phylogeny coalesce is inversely proportional to the effective population size. 
+
+The most important function for this is 'Phy2Sky'. This takes as its first argument a multiPhylo object, which is effectively a list of phylo objects, each of which is a tree. This type of object is the typical result of reading in the output from a program which does Bayesian inference, such as BEAST or MrBayes.
+
+## Reading trees
+
+Alternatively, a multiPhylo object can be simulated using rmtree in the ape package. For future use, write these into a nexus file. 
+
+Start by loading the multiNe package, and making an example trees file. This can be written to a nexus file. 
+
+```{r}
+require(multiNe,quietly=T)
+require(ape,quietly=T)
+trees<-rmtree(N = 5,n=10,tip.label=paste("t",1:10,"_",round(digits=2,runif(10,2000,2010)),sep=""))
+dir.create("tests",showWarnings = F)
+write.nexus(trees,file="tests/my_tree_file.nexus")
+```
+
+You can access your trees in one of two ways. Either you can read them into R beforehand as a `multiPhylo` object e.g. using 
+
+```{r}
+trees<-read.nexus(file="tests/my_tree_file.nexus") 
+Phy2Sky(trees,output_type="list")
+```
+
+Or you can get the function itself to read them in for you. 
+
+```{r eval=F}
+Phy2Sky(trees = "tests/my_tree_file.nexus",file_type="nex",output_type="list")
+```
+
+## Output types
+
+The default `output_type="list"` will produce a list, one for each tree, of skyline objects
+
+The `output_type="matrices"` will produce two tables, with the columns of the table representing each tree, one (`time_mat`) with the end times of each coalescent interval, and one (`pop_mat`) with the effective population size during that interval, and each row representing a coalescent event in that tree. 
+
+```{r}
+Phy2Sky(trees,output_type="matrices")
+```
+
+The `output_type="master"` will produce a single master table which is a merged form of the previous table. The first column represents time and contains every time point at which an event happens across all of the trees. Each remaining column represents a tree and contains the effective population size at that time point. As each time point contains only a single event, you can observe that the effective population size changes in only one tree at a time. 
+
+```{r}
+Phy2Sky(trees,output_type = "master")
+```
+
+The most comprehensive option, `output_type="conf.int.plot"` will do the above and plot a figure with the median skyline and its confidence intervals. The median value at each time point is simply chosen as the median (50th percentile of) effective population size across all the trees i.e. a row of the master matrix. Correspondingly, the confidence intervals at that time point are the 2.5th and 97.5th percentile. 
+
+```{r}
+conf_int_obj<-Phy2Sky(trees,output_type = "conf.int.plot")
+```
+
+Finally, the `output_type="conf.int"` returns only the data used to create the plot above, which is a matrix with 4 columns representing the time, median, lower and upper confidence intervals, respectively. This can be plotted again, without performing the analysis, using conf.int.skyline.
+
+```{r}
+conf_int_obj<-Phy2Sky(trees,output_type = "conf.int")
+conf.int.skyline(conf_int_obj)
+```
+
+## Additional arguments
+
+Assuming that the set of trees is raw posterior output, you will presumably want to discard some proportion of the early trees, and this is specified with `burninfrac`. This can be assessed by examining the accompanying log file in Tracer. 
+
+```{r eval=F}
+Phy2Sky(trees,output_type = "conf.int.plot",burninfrac=0.1)
+```
+
+If the branch lengths of the trees are in substitutions per site, and you want the skyline plot to be in units of time, you may wish to scale them according to a clock rate, which is specified with `scaling`.
+
+```{r}
+Phy2Sky(trees,output_type = "conf.int.plot",scaling=0.011)
+```
+
+If the names of the tips of the tree contain the date, then the skyline can be directly fixed to those dates. This is done by setting `fixToDate=TRUE`, and then by specifying a function which will return the dates as numeric values. In this example, this assumes that the tips are labelled as follows, as an example: `t1_2001.2, t2_2005.3, t3_2009.98` etc. 
+
+```{r}
+Date_FUN = function(label) as.numeric(gsub(".*_([.0-9]+)","\\1",label))
+Date_FUN(trees[[1]]$tip.label) #this should return a vector of tip dates
+Phy2Sky(trees,output_type = "conf.int.plot",fixToDate = T,Date_FUN = Date_FUN)
+```
+
+If the `multiPhylo` object or the file containing the trees is very large, it may be very time-consuming to read in and perform the coalescent analysis on them. The argument max_trees allows only a limited number to be used, which is by default 1000. The trees are then selected at regular intervals from the `multiPhylo` object. 
+
+```{r}
+par(mfrow=c(1,2))
+Phy2Sky(trees,output_type = "conf.int.plot",main=paste(length(trees),"trees"))
+Phy2Sky(trees,output_type = "conf.int.plot",max.trees=2,main("2 trees"))
+```
+
+Skyline data are usually presented by a step function, consistenting of only vertical and horizontal lines, implying that for a given period the best estimate for the effective population size is a certain value. For some analyses, it may be preferred that points on the graph are joined by straight sloping lines, implying that the effective population size during this period changes in a regular fashion. 
+
+```{r}
+par(mfrow=c(1,2))
+Phy2Sky(trees,output_type = "conf.int.plot",plot_type="step",main="step")
+Phy2Sky(trees,output_type = "conf.int.plot",plot_type="linear",main="linear")
+```
+
+Another useful plotting feature is the smoothing capability when using `output_type="conf.int.plot"`. If the value `epsilon` is specified, this means that no time interval in the plot will be shorter than that value (default `epsilon=0`). This is achieved by combining neighbouring intervals until the condition is met. 
+
+```{r}
+par(mfrow=c(2,2))
+Phy2Sky(trees,output_type = "conf.int.plot",epsilon=0,main=paste("Epsilon",0))
+Phy2Sky(trees,output_type = "conf.int.plot",epsilon=0.01,main=paste("Epsilon",0.01))
+Phy2Sky(trees,output_type = "conf.int.plot",epsilon=0.1,main=paste("Epsilon",0.1))
+Phy2Sky(trees,output_type = "conf.int.plot",epsilon=0.5,main=paste("Epsilon",0.5))
+```
+
+## Return ages of nodes in a phylogeny
+
+An additional useful feature of this package is `getNodeAges`. This returns a vector with the ages of each of the tips, root and internal nodes (in that order). The tip ages in the vector are labelled with the name of the tip; the root node is named `root`; and the internal nodes are named `<NA>`. The argument `from_past` determines whether the ages are relative to the root or the youngest tip: the default is the latter. 
+
+```{r}
+getNodeAges(trees[[1]],from_past=F)
+getNodeAges(trees[[1]],from_past=T)
+```
