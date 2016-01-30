@@ -9,7 +9,6 @@ output: pdf_document
   On the other hand, Ne can be estimated by observing and quantifying deviations from expections of infinitely large populations. We expect, for example, the neither linkage disequilibrium (Weir 1979) and drift (Waples) in infinitely large populations. The presence of either of these phenomena thus indicates a population smaller than infinity, and the magnitude of the phenomena scales with population size. These estimators calculate Ne of a population over the past few generations, whereas coalescent estimators generally integrate Ne over the past Ne to 4*Ne generations, depending of the mode of inheritance of the genetic marker employed.   
 
 ```{r, include=FALSE}
-setwd("/Users/christineewers/Desktop/EffSize_package/EffSize_hackathon")
 source("sim.R")
 source("LDNe_051815.R")
 source("temporalNe.R")
@@ -17,11 +16,11 @@ source("temporalNe.R")
   
   This vignette will show the functionality of the functions LDNe and VarNe, which calculate effective population size based on levels of linkage disequilibrium and drift, repectively. First, you need to install the package multiNe like so:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 install.packages("multiNe")
 ```
 To test if multiNe was correctly installed, type:
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 library(multiNe)
 ```
 If no errors appeared, the package is installed properly.   
