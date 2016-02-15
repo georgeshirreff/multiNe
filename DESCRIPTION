@@ -16,4 +16,5 @@ Imports:
     phyclust,
     phangorn,
     INLA
+Remotes: mdkarcher/phylodyn    
 RoxygenNote: 5.0.1
