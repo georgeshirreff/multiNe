@@ -7,6 +7,7 @@
 
 .generate_newick<-function (args, sample) 
 {
+    ##This function is repeted from phylodyn (delete and add dependency to phylodyn)
   n <- sum(sample[, 1])
   labels <- paste(rep("t", n), seq(1, n, 1), rep("_", n), rep(sample[, 
                                                                      2], sample[, 1]), sep = "")
@@ -47,10 +48,19 @@
         initial.row <- initial.row + 1
         tb <- tb + 1
         temp_times <- c(temp_times, s)
+      }else{
+          end<-cumsum(sample[,1])[initial.row]
+          ini<-cumsum(sample[,1])[initial.row-1]+1
+          for (k in ini:end){
+              temp_labels<-c(temp_labels,labels[k])
+              tb<-tb+1
+              temp_times<-c(temp_times,s)
+          }
+          initial.row<-initial.row+1
       }
     }
   }
-  out.tree <- read.tree(text = paste(temp_labels, ";", sep = ""))
+  out.tree <- ape::read.tree(text = paste(temp_labels, ";", sep = ""))
   return(list(newick = out.tree, labels = labels))
 }
 
