@@ -158,7 +158,7 @@
   intercoal_times = c(out[1], diff(out))
   lineages = branches
   coal_times<-cumsum(intercoal_times)
-  args<-gen_INLA_args(coal_times,s_times,n_sampled)
+  args<-phylodyn::gen_INLA_args(coal_times,s_times,n_sampled)
   out<-phylodyn::generate_newick(args,cbind(n_sampled,s_times))$newick
   return(out)
 }
