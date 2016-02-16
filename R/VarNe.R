@@ -17,7 +17,7 @@ require(adegenet)
 #' @examples data(nancycats)
 #' @examples varNe(nancycats)
 #' 
-genObj <- simG3
+genObj <- data(simG3)
 t <- c(0,1,2) # provided by the user, the generations at which the samples were taken
 
 varNe_point <- function(genObj, t = seq(1:length(genObj@pop.names))) {
@@ -26,7 +26,7 @@ varNe_point <- function(genObj, t = seq(1:length(genObj@pop.names))) {
   genPopObj <- genind2genpop(genObj)
   f <- makefreq(genPopObj) # columns are populations/generations. Allele freq per locus per pop are calculated
 
-  K <- genObj@loc.nall # number of alleles per loci overall
+  K <- genObj@loc.n.all # number of alleles per loci overall
   sum.K <- sum(K)
   L <- length(K) # number of loci
   genind.by.loc <- seploc(genObj) # one genind object per locus as list elements

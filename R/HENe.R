@@ -19,7 +19,7 @@ getSampleSize_byLocus <- function(genind_obj)
 {
   K<-length(genind_obj@all.names)
   
-  ends<-cumsum(genind_obj@loc.nall)
+  ends<-cumsum(genind_obj@loc.n.all)
   starts<-c(0,ends[-length(ends)])+1
   
   sample_sizes<-numeric(K)
@@ -75,7 +75,7 @@ HENe <- function(genind_obj) {
       d[[j]][i] <- (Hobs[[j]][i]-Hexp[[j]][i]) / Hexp[[j]][i]
     }
     
-    w[j] <- sqrt(sample_sizes[j])*(genind_obj@loc.nall[j]-1) / genind_obj@loc.nall[j]
+    w[j] <- sqrt(sample_sizes[j])*(genind_obj@loc.n.all[j]-1) / genind_obj@loc.n.all[j]
     d.per.locus[j] <- sample_sizes[j]*sum(d[[j]])
     dw[j] <- d.per.locus[j]*w[j]
   }

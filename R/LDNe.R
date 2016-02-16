@@ -72,7 +72,7 @@ makeCrit <- function(genObj, crit=0.01) {
           genCrit[[j]]@tab[k,] <- NA      
         }
       }
-      genCrit[[j]]@loc.nall <- ncol(genCrit[[j]]@tab)
+      genCrit[[j]]@loc.n.all <- ncol(genCrit[[j]]@tab)
       genCrit[[j]]@loc.fac <- genind.by.locus[[j]]@loc.fac[pp]
       genCrit[[j]]@all.names[[1]] <- genind.by.locus[[j]]@all.names[[1]][pp]
   }
