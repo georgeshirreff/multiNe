@@ -1,6 +1,6 @@
 ### Simulating microsatellite data with forward time simulations:
 
-setwd("/Users/christineewers/Desktop/EffSize_package/EffSize_hackathon")
+#setwd("/Users/christineewers/Desktop/EffSize_package/EffSize_hackathon")
 
 library(rmetasim)
 library(adegenet)
@@ -45,7 +45,7 @@ g0@pop.names <- "0"
 g1@pop.names <- "1"
 g2@pop.names <- "2"
 g <- repool(g0, g1, g2)
-g@loc.nall # 2 loci: 6 and 5 alleles
+g@loc.n.all # 2 loci: 6 and 5 alleles
 
 
 
