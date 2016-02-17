@@ -15,6 +15,7 @@ Imports:
     adegenet,
     phyclust,
     phangorn,
+    rmetasim,
     INLA
 Remotes: mdkarcher/phylodyn    
 RoxygenNote: 5.0.1
