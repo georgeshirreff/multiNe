@@ -1,12 +1,8 @@
 \name{simG}
 \alias{simG}
 \docType{data}
-\title{
-%%   simG
-}
-\description{
-%%  Genind object. Microsatellite data set for 50 diploid individuals: two loci, sampled in the same generation. Simulated with rmetasim: sampled after 1000 generations. Mu = 0.01
-}
+\title{simG}
+\description{Genind object. Microsatellite data set for 50 diploid individuals: two loci, sampled in the same generation. Simulated with rmetasim: sampled after 1000 generations. Mu = 0.01}
 \usage{data("simG")}
 \format{
   The format is:
