@@ -5,7 +5,7 @@
 library(rmetasim)
 library(adegenet)
 library(pegas)
-source("rmetasim2adegenet.R")
+#?source("rmetasim2adegenet.R")
 
 ne <- function(t, mu) {
   x <- t / (4*mu)
@@ -38,20 +38,20 @@ dummy.gen2 <- landscape.simulate(dummy.gen1, 1) # advance to the next generation
 
 
 #make the output into an adegenet object
-g0 <- landscape.make.genind(dummy.gen0)
-g1 <- landscape.make.genind(dummy.gen1)
-g2 <- landscape.make.genind(dummy.gen2)
-g0@pop.names <- "0"
-g1@pop.names <- "1"
-g2@pop.names <- "2"
-g <- repool(g0, g1, g2)
-g@loc.n.all # 2 loci: 6 and 5 alleles
+#?g0 <- landscape.make.genind(dummy.gen0)
+#?g1 <- landscape.make.genind(dummy.gen1)
+#?g2 <- landscape.make.genind(dummy.gen2)
+#?g0@pop.names <- "0"
+#?g1@pop.names <- "1"
+#?g2@pop.names <- "2"
+#?g <- repool(g0, g1, g2)
+#?g@loc.n.all # 2 loci: 6 and 5 alleles
 
 
 
 # subsample 50 individuals 
-g0S <- g0[sample(1:999, size=50, replace=F)]
-g1S <- g1[sample(1:999, size=50, replace=F)]
-g2S <- g2[sample(1:999, size=50, replace=F)]
-simG3 <-repool(g0S, g1S, g2S)
-simG <- g0S 
+#?g0S <- g0[sample(1:999, size=50, replace=F)]
+#?g1S <- g1[sample(1:999, size=50, replace=F)]
+#?g2S <- g2[sample(1:999, size=50, replace=F)]
+#?simG3 <-repool(g0S, g1S, g2S)
+#?simG <- g0S
