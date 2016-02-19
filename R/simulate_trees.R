@@ -238,7 +238,7 @@ simulate.tree<-function(n=10,N=1,sampling="iso",args="-T -G 0.1",Ne=1,max=1,simu
   if (simulator=="ms"){
     library("phyclust")
     if (is.null(args)){args<-"-T"}
-    out<-read.tree(text=paste(rep(ms(nsam = n, opts = args)[3],N),sep="\n"))  
+    out<-read.tree(text=paste(replicate(N,ms(nsam = n, opts = args)[3]),sep="\n"))  
     return(list(out=out,description=paste("Simulation using ms with args:",args,sep=" ")))
   }
   if (simulator=="thinning"){
