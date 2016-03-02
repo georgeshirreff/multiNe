@@ -231,7 +231,7 @@
 simulate.tree<-function(n=10,N=1,sampling="iso",args="-T -G 0.1",Ne=1,max=1,simulator=NULL,sample=NULL, ...){
   if (is.null(simulator)) {
     #Generates samples using rcoal with Ne=1. If this is a mistake, specify your simulator (ms,thinning,standard)
-    out<-replicate(N,rcoal(n),simplify=FALSE)
+    out<-replicate(N,ape::rcoal(n),simplify=FALSE)
     class(out)<-"multiPhylo"
     return(list(out=out,description="Simulation from a constant population size Ne=1"))
   }
@@ -260,7 +260,7 @@ simulate.tree<-function(n=10,N=1,sampling="iso",args="-T -G 0.1",Ne=1,max=1,simu
       if (is.null(sample)){
         sample<-c(n,0)
       }
-      out<-replicate(N,rcoal(n,br=.coalgen_thinning_iso(sample,fun_inv,max)$intercoal_times),simplify=FALSE)
+      out<-replicate(N,ape::rcoal(n,br=.coalgen_thinning_iso(sample,fun_inv,max)$intercoal_times),simplify=FALSE)
       class(out)<-"multiPhylo"
       
       return(list(out=out,description="isochronous simulation using thinning with trajectory provided"))
@@ -272,7 +272,7 @@ simulate.tree<-function(n=10,N=1,sampling="iso",args="-T -G 0.1",Ne=1,max=1,simu
       #        #sampling is heterochronous
       if (is.null(sample)){ #it is actually isochronous
         sample<-c(n,0)
-        out<-replicate(N,rcoal(n,br=.coalgen_thinning_iso(sample,fun_inv,max)$intercoal_times),simplify=FALSE)
+        out<-replicate(N,ape::rcoal(n,br=.coalgen_thinning_iso(sample,fun_inv,max)$intercoal_times),simplify=FALSE)
         class(out)<-"multiPhylo"
         
         return(list(out=out,description="isochronous simulation using thinning with trajectory provided"))
