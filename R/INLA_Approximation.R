@@ -1,3 +1,169 @@
+#' Multi Loci Bayesian nonparametric phylodynamic reconstruction.
+#' 
+#' @param data \code{multiPhylo} object or list containing vectors of coalescent 
+#'   times \code{coal_times}, sampling times \code{samp_times}, and number 
+#'   sampled per sampling time \code{n_sampled}.
+#' @param lengthout numeric specifying number of grid points.
+#' @param pref logical. Should the preferential sampling model be used?
+#' @param prec_alpha,prec_beta numerics specifying gamma prior for precision 
+#'   \eqn{\tau}.
+#' @param beta1_prec numeric specifying precision for normal prior on 
+#'   \eqn{\beta_1}.
+#' @param simplify logical whether to fully bucket all Poisson points.
+#' @param derivative logical whether to calculate estimates of the 
+#'   log-derivative.
+#' @param forward logical whether to use the finite difference approximations of
+#'   the log-derivative as a forward or backward derivative.
+#'   
+#' @return Phylodynamic reconstruction of effective population size from multiple independent genealogies 
+#' at grid points. \code{result} contains the INLA output, \code{data} contains the 
+#'   information passed to INLA, \code{grid} contains the grid end points, 
+#'   \code{x} contains the grid point centers, \code{effpop} contains a vector 
+#'   of the posterior median effective population size estimates, 
+#'   \code{effpop025} and \code{effpop975} contain the 2.5th and 97.5th 
+#'   posterior percentiles, \code{summary} contains a data.frame of the 
+#'   estimates, and \code{derivative} (if \code{derivative = TRUE}) contains a
+#'   data.frame summarizing the log-derivative.
+#' @export
+#' 
+#' @examples
+#' res = BNPR_Multiple(simulate.tree(n=10,N=2,simulator="ms",args="-T -G 0.1")$out)
+#' phylo::plot_BNPR(res)
+BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
+                 prec_beta=0.01, beta1_prec = 0.001, simplify = TRUE,
+                 derivative = FALSE, forward = TRUE)
+{
+  if (class(data) != "multiPhylo")
+  {
+    return(phylodyn::BNPR(data,lengthout,pref,prec_alpha,prec_beta,beta1_prec,simplify,derivative,forward))
+  }
+  else {
+    
+    ntrees<-length(data)
+    phy <- phylodyn::summarize_phylo(data[[1]])  
+    range.upp<-max(phy$coal_times)
+    range.low<-min(phy$samp_times)
+    
+    for (j in 2:ntrees){
+    phy <- phylodyn::summarize_phylo(data[[j]]) 
+    range.upp<-max(range.upp,max(phy$coal_times))
+    range.low<-min(range.low,min(phy$samp_times))
+    }
+    grid <- seq(range.low, range.upp, length.out = lengthout+1)
+    
+    #//replace by multiple
+    
+    result <- infer_coal_multiple(samp_times = phy$samp_times, coal_times = phy$coal_times,
+                            n_sampled = phy$n_sampled, grid=grid,
+                            prec_alpha = prec_alpha, prec_beta = prec_beta,
+                            beta1_prec = beta1_prec, use_samp = pref,
+                            simplify = simplify, derivative = derivative)
+  
+  result$samp_times <- phy$samp_times
+  result$n_sampled  <- phy$n_sampled
+  result$coal_times <- phy$coal_times
+  
+  result$effpop    <- exp(-result$result$summary.random$time$`0.5quant`)
+  result$effpop975 <- exp(-result$result$summary.random$time$`0.025quant`)
+  result$effpop025 <- exp(-result$result$summary.random$time$`0.975quant`)
+  
+  result$summary <- with(result$result$summary.random$time,
+                         data.frame(time = ID, mean = exp(-mean),
+                                    sd = sd * exp(-mean),
+                                    quant0.025 = exp(-`0.975quant`),
+                                    quant0.5 = exp(-`0.5quant`),
+                                    quant0.975 = exp(-`0.025quant`)))
+  
+  if (derivative)
+  {
+    if (forward)
+      ind <- c(1:(lengthout-1), (lengthout-1))
+    else
+      ind <- c(1, 1:(lengthout-1))
+    
+    result$derivative <- with(result$result$summary.lincomb,
+                              data.frame(time = result$x, mean = -mean[ind], sd = sd[ind],
+                                         quant0.025 = -`0.975quant`[ind],
+                                         quant0.5   = -`0.5quant`[ind],
+                                         quant0.975 = -`0.025quant`[ind]))
+  }
+  
+  
+  return(result)
+}
+
+  infer_coal_multiple <- function(data=data, grid,
+                         prec_alpha = 0.01, prec_beta = 0.01, simplify = FALSE,
+                         derivative = FALSE)
+  {
+    j<-1
+    phy <- phylodyn::summarize_phylo(data[[j]]) 
+    if (min(phy$coal_times) < min(phy$samp_times))
+      stop("First coalescent time occurs before first sampling time")
+    
+    if (max(phy$samp_times) > max(phy$coal_times))
+      stop("Last sampling time occurs after last coalescent time")
+    
+    if (is.null(phy$n_sampled))
+      phy$n_sampled <- rep(1, length(samp_times))
+    
+    
+    coal_data <- phylodyn::coal_stats(grid = grid, samp_times = phy$samp_times, n_sampled = phy$n_sampled,
+                                      coal_times = phy$coal_times)
+    #check whether having 0 is a good idea
+    coal_data<-coal_data[coal_data[,4]!=-100L,]
+    coal_data$tree<-rep(1,nrow(coal_data))
+    
+    for (j in 2:ntrees){
+      phy <- phylodyn::summarize_phylo(data[[j]]) 
+      if (min(phy$coal_times) < min(phy$samp_times))
+        stop("First coalescent time occurs before first sampling time")
+      
+      if (max(phy$samp_times) > max(phy$coal_times))
+        stop("Last sampling time occurs after last coalescent time")
+      
+      if (is.null(phy$n_sampled))
+        phy$n_sampled <- rep(1, length(samp_times))
+      
+      
+    coal_data_temp <- phylodyn::coal_stats(grid = grid, samp_times = phy$samp_times, n_sampled = phy$n_sampled,
+                            coal_times = phy$coal_times)
+    #check whether having 0 is a good idea
+    coal_data_temp<-coal_data_temp[coal_data_temp[,4]!=-100L,]
+    coal_data_temp$tree<-rep(j,nrow(coal_data_temp))
+    coal_data<-rbind(coal_data,coal_data_temp)
+    }
+    
+    
+    if (simplify)
+      coal_data <- with(coal_data, phylodyn::condense_stats(time = time, event = event, E=E))
+    
+    data <- with(coal_data, data.frame(y = event, time = time, E_log = E_log))
+    hyper <- list(prec = list(param = c(prec_alpha, prec_beta)))
+    formula <- y ~ -1 + f(time, model="rw1", hyper = hyper, constr = FALSE)
+    
+    if (derivative)
+    {
+      Imat <- diag(lengthout)
+      A <- head(Imat, -1) - tail(Imat, -1)
+      field <- grid[-1] - diff(grid)/2
+      A <- diag(1/diff(field)) %*% A
+      A[A == 0] <- NA
+      
+      lc_many <- INLA::inla.make.lincombs(time = A)
+      
+      mod <- INLA::inla(formula, family = "poisson", data = data, lincomb = lc_many,
+                        control.predictor = list(compute=TRUE),
+                        control.inla = list(lincomb.derived.only=FALSE))
+    }
+    else
+    {
+      mod <- INLA::inla(formula, family = "poisson", data = data, offset = data$E_log,
+                        control.predictor = list(compute=TRUE))
+    }
+    
+    return(list(result = mod, data = data, grid = grid, x = coal_data$time))
+  }
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param coal.factor is a vector with coalescent times in increasing order
