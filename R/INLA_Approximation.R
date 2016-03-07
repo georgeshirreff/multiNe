@@ -353,7 +353,7 @@ calculate.moller<-function(tree,lengthout,L=1){
  if (class(tree)=="phylo") {return(.calculate.moller1(tree,lengthout,L))}
  else {
    L<-ape::coalescent.intervals(tree[[1]])$total.depth
-   for (j in 2:length(tree)){L<-min(L,coalescent.intervals(tree[[j]])$total.depth)}
+   for (j in 2:length(tree)){L<-min(L,ape::coalescent.intervals(tree[[j]])$total.depth)}
    result<-matrix(NA,nrow=lengthout,ncol=length(tree)+1)
    result[,1:2]<-.calculate.moller1(tree[[1]],lengthout,L)[,1:2]
    for (j in (2:length(tree))){
