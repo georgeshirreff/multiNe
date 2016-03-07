@@ -57,9 +57,7 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
                             prec_alpha = prec_alpha, prec_beta = prec_beta,
                             simplify = simplify, derivative = derivative,constr = constr)
   
-  result$samp_times <- phy$samp_times
-  result$n_sampled  <- phy$n_sampled
-  result$coal_times <- phy$coal_times
+ 
   
   result$effpop    <- exp(-result$result$summary.random$time$`0.5quant`)[1:lengthout]
   result$effpop975 <- exp(-result$result$summary.random$time$`0.025quant`)[1:lengthout]
@@ -110,7 +108,10 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     coal_data <- phylodyn::coal_stats(grid = grid, samp_times = phy$samp_times, n_sampled = phy$n_sampled,
                                       coal_times = phy$coal_times)
     #check whether having 0 is a good idea
-    #coal_data<-coal_data[coal_data[,4]!=-100L,]
+    coal_data<-coal_data[coal_data[,4]!=-100L,]
+    coal_times_list<-phy$coal_times
+    samp_times_list<-phy$samp_times
+    n_sampled_list<-phy$n_sampled
     coal_data$tree<-rep(1,nrow(coal_data))
    if (ntrees>1){ 
     for (j in 2:ntrees){
@@ -128,9 +129,13 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     coal_data_temp <- phylodyn::coal_stats(grid = grid, samp_times = phy$samp_times, n_sampled = phy$n_sampled,
                             coal_times = phy$coal_times)
     #check whether having 0 is a good idea
-    coal_data_temp<-coal_data_temp[coal_data_temp[,4]!=-100L,]
+   # coal_data_temp<-coal_data_temp[coal_data_temp[,4]!=-100L,]
     coal_data_temp$tree<-rep(j,nrow(coal_data_temp))
     coal_data<-rbind(coal_data,coal_data_temp)
+    
+    coal_times_list<-rbind(coal_times_list,phy$coal_times)
+    samp_times_list<-rbind(samp_times_list,phy$samp_times)
+    n_sampled_list<-rbind(n_sampled_list,phy$n_sampled)
     }
    }
     
@@ -164,7 +169,8 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
       
     }
     
-    return(list(result = mod, data = data, grid = grid, x = unique(coal_data$time)))
+    return(list(result = mod, data = data, grid = grid, x = unique(coal_data$time),samp_times=unique(samp_times_list),n_sampled=unique(n_sampled_list),coal_times=unique(coal_times_list)))
+   
   }
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
