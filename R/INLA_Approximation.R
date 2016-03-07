@@ -30,49 +30,47 @@
 #' res = BNPR_Multiple(simulate.tree(n=10,N=2,simulator="ms",args="-T -G 0.1")$out)
 #' phylo::plot_BNPR(res)
 BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
-                 prec_beta=0.01, beta1_prec = 0.001, simplify = TRUE,
-                 derivative = FALSE, forward = TRUE)
+                 prec_beta=0.01, beta1_prec = 0.001, simplify = TRUE, ntrees=0,
+                 derivative = FALSE, forward = TRUE,constr = FALSE)
 {
   if (class(data) != "multiPhylo")
   {
     return(phylodyn::BNPR(data,lengthout,pref,prec_alpha,prec_beta,beta1_prec,simplify,derivative,forward))
   }
   else {
-    
-    ntrees<-length(data)
+    if (ntrees==0){ntrees<-length(data)}
     phy <- phylodyn::summarize_phylo(data[[1]])  
     range.upp<-max(phy$coal_times)
     range.low<-min(phy$samp_times)
     
+    if (ntrees>1){
     for (j in 2:ntrees){
     phy <- phylodyn::summarize_phylo(data[[j]]) 
     range.upp<-max(range.upp,max(phy$coal_times))
     range.low<-min(range.low,min(phy$samp_times))
-    }
+    }}
     grid <- seq(range.low, range.upp, length.out = lengthout+1)
     
     #//replace by multiple
     
-    result <- infer_coal_multiple(samp_times = phy$samp_times, coal_times = phy$coal_times,
-                            n_sampled = phy$n_sampled, grid=grid,
+    result <- infer_coal_multiple(data=data, grid=grid, ntrees=ntrees,
                             prec_alpha = prec_alpha, prec_beta = prec_beta,
-                            beta1_prec = beta1_prec, use_samp = pref,
-                            simplify = simplify, derivative = derivative)
+                            simplify = simplify, derivative = derivative,constr = constr)
   
   result$samp_times <- phy$samp_times
   result$n_sampled  <- phy$n_sampled
   result$coal_times <- phy$coal_times
   
-  result$effpop    <- exp(-result$result$summary.random$time$`0.5quant`)
-  result$effpop975 <- exp(-result$result$summary.random$time$`0.025quant`)
-  result$effpop025 <- exp(-result$result$summary.random$time$`0.975quant`)
+  result$effpop    <- exp(-result$result$summary.random$time$`0.5quant`)[1:lengthout]
+  result$effpop975 <- exp(-result$result$summary.random$time$`0.025quant`)[1:lengthout]
+  result$effpop025 <- exp(-result$result$summary.random$time$`0.975quant`)[1:lengthout]
   
-  result$summary <- with(result$result$summary.random$time,
-                         data.frame(time = ID, mean = exp(-mean),
-                                    sd = sd * exp(-mean),
-                                    quant0.025 = exp(-`0.975quant`),
-                                    quant0.5 = exp(-`0.5quant`),
-                                    quant0.975 = exp(-`0.025quant`)))
+  result$summary <- with(result$result$summary.random$time[1:lengthout,],
+                         data.frame(time = ID[1:lengthout], mean = exp(-mean)[1:lengthout],
+                                    sd = sd[1:lengthout] * exp(-mean)[1:lengthout],
+                                    quant0.025 = exp(-`0.975quant`)[1:lengthout],
+                                    quant0.5 = exp(-`0.5quant`)[1:lengthout],
+                                    quant0.975 = exp(-`0.025quant`)[1:lengthout]))
   
   if (derivative)
   {
@@ -89,15 +87,16 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
   }
   
   
+  
   return(result)
 }
+}
 
-  infer_coal_multiple <- function(data=data, grid,
-                         prec_alpha = 0.01, prec_beta = 0.01, simplify = FALSE,
-                         derivative = FALSE)
+  infer_coal_multiple <- function(data=data, grid=grid,ntrees=ntrees,
+                         prec_alpha = 0.01, prec_beta = 0.01, simplify = TRUE,
+                         derivative = FALSE,constr = FALSE)
   {
-    j<-1
-    phy <- phylodyn::summarize_phylo(data[[j]]) 
+    phy <- phylodyn::summarize_phylo(data[[1]]) 
     if (min(phy$coal_times) < min(phy$samp_times))
       stop("First coalescent time occurs before first sampling time")
     
@@ -111,9 +110,9 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     coal_data <- phylodyn::coal_stats(grid = grid, samp_times = phy$samp_times, n_sampled = phy$n_sampled,
                                       coal_times = phy$coal_times)
     #check whether having 0 is a good idea
-    coal_data<-coal_data[coal_data[,4]!=-100L,]
+    #coal_data<-coal_data[coal_data[,4]!=-100L,]
     coal_data$tree<-rep(1,nrow(coal_data))
-    
+   if (ntrees>1){ 
     for (j in 2:ntrees){
       phy <- phylodyn::summarize_phylo(data[[j]]) 
       if (min(phy$coal_times) < min(phy$samp_times))
@@ -133,6 +132,7 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     coal_data_temp$tree<-rep(j,nrow(coal_data_temp))
     coal_data<-rbind(coal_data,coal_data_temp)
     }
+   }
     
     
     if (simplify)
@@ -140,7 +140,8 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     
     data <- with(coal_data, data.frame(y = event, time = time, E_log = E_log))
     hyper <- list(prec = list(param = c(prec_alpha, prec_beta)))
-    formula <- y ~ -1 + f(time, model="rw1", hyper = hyper, constr = FALSE)
+    formula <- y ~ -1 + f(time, model="rw1", hyper = hyper, constr = constr)
+    #formula <- y ~ -1 + f(time, model="rw1", hyper = hyper, constr = constr,replicate=tree)
     
     if (derivative)
     {
@@ -160,9 +161,10 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     {
       mod <- INLA::inla(formula, family = "poisson", data = data, offset = data$E_log,
                         control.predictor = list(compute=TRUE))
+      
     }
     
-    return(list(result = mod, data = data, grid = grid, x = coal_data$time))
+    return(list(result = mod, data = data, grid = grid, x = unique(coal_data$time)))
   }
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
