@@ -275,7 +275,7 @@ calculate.moller.hetero<-function (coal.factor, s, event, lengthout, prec_alpha 
 #'@author Julia Palacios \email{julia.pal.r@@gmail.com}
 
 .calculate.moller1<-function(tree,lengthout,L=1){
-  ci<-coalescent.intervals(tree)
+  ci<-ape::coalescent.intervals(tree)
   data1<-cbind(ci$interval.length,ci$lineages)
   s<-cumsum(data1[,1])
   coal.factor<-data1[,2]*(data1[,2]-1)*.5
