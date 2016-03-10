@@ -51,13 +51,10 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     }}
     grid <- seq(range.low, range.upp, length.out = lengthout+1)
     
-    #//replace by multiple
-    
     result <- infer_coal_multiple(data=data, grid=grid, ntrees=ntrees,
                             prec_alpha = prec_alpha, prec_beta = prec_beta,
                             simplify = simplify, derivative = derivative,constr = constr)
-  
- 
+    
   
   result$effpop    <- exp(-result$result$summary.random$time$`0.5quant`)[1:lengthout]
   result$effpop975 <- exp(-result$result$summary.random$time$`0.025quant`)[1:lengthout]
@@ -172,6 +169,7 @@ BNPR_Multiple <- function(data, lengthout = 100, pref=FALSE, prec_alpha=0.01,
     return(list(result = mod, data = data, grid = grid, x = unique(coal_data$time),samp_times=unique(samp_times_list),n_sampled=unique(n_sampled_list),coal_times=unique(coal_times_list)))
    
   }
+ 
 #'@title calculate.moller.hetero
 #'@description Approximates the posterior distribution of Ne from a single genealogy at a regular grid of points using INLA package
 #'@param coal.factor is a vector with coalescent times in increasing order
