@@ -23,7 +23,7 @@ t <- c(0,1,2) # provided by the user, the generations at which the samples were 
 varNe_point <- function(genObj, t = seq(1:length(genObj@pop.names))) {
   G <- length(genObj@pop.names) # number of generations sampled
   no.com <-  G*(G-1)/2 # number of possible comparisons between two generations
-  genPopObj <- genind2genpop(genObj)
+  genPopObj <- genind2genpop(genObj, quiet = TRUE)
   f <- makefreq(genPopObj) # columns are populations/generations. Allele freq per locus per pop are calculated
 
   K <- genObj@loc.n.all # number of alleles per loci overall
@@ -34,7 +34,7 @@ varNe_point <- function(genObj, t = seq(1:length(genObj@pop.names))) {
   loc.pop <- vector("list", length=L)
   loc.pop.s <- matrix(0, nrow=G, ncol=L)
   for (i in 1:L) {
-    loc.pop[[i]] <- genind2genpop(genind.by.loc[[i]]) # one list element per locus
+    loc.pop[[i]] <- genind2genpop(genind.by.loc[[i]], quiet = TRUE) # one list element per locus
     loc.pop.s[,i] <- rowSums(loc.pop[[i]]@tab)/2 # number of ind. sampled per generation. Matrix with loci in columns, generations in rows
   }
 
