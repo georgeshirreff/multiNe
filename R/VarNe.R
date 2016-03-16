@@ -24,7 +24,7 @@ varNe_point <- function(genObj, t = seq(1:length(genObj@pop.names))) {
   G <- length(genObj@pop.names) # number of generations sampled
   no.com <-  G*(G-1)/2 # number of possible comparisons between two generations
   genPopObj <- genind2genpop(genObj, quiet = TRUE)
-  f <- makefreq(genPopObj) # columns are populations/generations. Allele freq per locus per pop are calculated
+  f <- makefreq(genPopObj, quiet = TRUE) # columns are populations/generations. Allele freq per locus per pop are calculated
 
   K <- genObj@loc.n.all # number of alleles per loci overall
   sum.K <- sum(K)
