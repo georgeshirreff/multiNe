@@ -1,32 +1,31 @@
 ---
 title: 'Vignette: Calculating contemporary Ne'
 author: "Christine Ewers-Saucedo, George Sheriff"
-date: "June 14, 2015"
 output: html_document
 ---
   
-  Effective population size is an important aspect of the evolutionary trajectory of a population. Its calculation, however, remains challenging, and has triggered the development of diverse calculations. We can distinguish between two fundamentally different ways to estimate $N_e$. On the one hand, coalsescent theory provides a means to estimate $N_e$ over evolutionary times using either summary statistics, such as the number of segregating sites (Watterson 1975), number of alleles (Ewens 1972), heterozygosity (Zouros 1979, Kimmel et al 1998), variance of the number of microsatellite repeats (Kimmel et al 1998), or using the shape of the genealogy itself (Kingman 1982). The parameter calculated is theta, the mutation-rate scaled effective population size. Knowing the mutation rate allows us then to convert theta into $N_e$. Several of these theta calculators are available in the R package pegas (Paradis 2010). The coalescent theory also allows the estimation of changes in $N_e$ over time based on changes in the branching pattern of the genealogy, which can be visualized in so-called scyline plots.  \
+  Effective population size is an important aspect of the evolutionary trajectory of a population. Its calculation, however, remains challenging, and has triggered the development of diverse calculations. We can distinguish between two fundamentally different ways to estimate $N_e$. On the one hand, coalsescent theory provides a means to estimate $N_e$ over evolutionary times using either summary statistics, such as the number of segregating sites, number of alleles, heterozygosity, variance of the number of microsatellite repeats, or using the shape of the genealogy itself. The parameter calculated is $\theta$, the mutation-rate scaled effective population size. Knowing the mutation rate allows us then to convert $\theta$ into $N_e$. Several of these theta calculators are available in the R package `pegas`. The coalescent theory also allows the estimation of changes in $N_e$ over time based on changes in the branching pattern of the genealogy, which can be visualized in so-called skyline plots.  \
 \
-On the other hand, $N_e$ can be estimated by observing and quantifying deviations from expections of infinitely large populations. We expect, for example, the neither linkage disequilibrium (Weir 1979) and drift (Waples) in infinitely large populations. The presence of either of these phenomena thus indicates a population smaller than infinity, and the magnitude of the phenomena scales with population size. These estimators calculate $N_e$ of a population over the past few generations, whereas coalescent estimators generally integrate Ne over the past $N_e$ to 4*$N_e$ generations, depending of the mode of inheritance of the genetic marker employed.   \
+On the other hand, $N_e$ can be estimated by observing and quantifying deviations from expections of infinitely large populations. We expect, for example, the neither linkage disequilibrium and drift in infinitely large populations. The presence of either of these phenomena thus indicates a population smaller than infinity, and the magnitude of the phenomena scales with population size. These estimators calculate $N_e$ of a population over the past few generations, whereas coalescent estimators generally integrate Ne over the past $N_e$ to 4*$N_e$ generations, depending of the mode of inheritance of the genetic marker employed.   \
   \
-This vignette will show the functionality of the functions `LDNe` and `VarNe`, which calculate effective population size based on levels of linkage disequilibrium and drift, repectively. First, you need to install the package multiNe like so:
+This vignette will show the functionality of the functions `LDNe` and `VarNe`, which calculate effective population size based on levels of linkage disequilibrium and drift, repectively. First, you need to install the package `multiNe` like so:
 
 ```{r, eval=TRUE}
 library("devtools")
 install_github("georgeshirreff/multiNe")
 ```
-To test if multiNe was correctly installed, type:
-```{r, eval=TRUE}
+To test if `multiNe` was correctly installed, type:
+```{r, eval = TRUE}
 library(multiNe)
-library(adegenet)
-library(pegas)
+library(adegenet, quietly = TRUE)
+library(pegas, quietly = TRUE)
 ```
 If no errors appeared, the package is installed properly.   
   
 ***
 **Linkage disequilibrium effective population size**
   
-  To calculate Ne based on linkage disequilibrium, we need genotypic data of at least two loci from a panmictic population, stored as a genind object. The dataset `simG` are simulated microsatellite data of three loci and 50 individuals, generated in rmetasim (Strand and Niehaus 2014). We will load the dataset like so:
+  To calculate Ne based on linkage disequilibrium, we need genotypic data of at least two loci from a panmictic population, stored as a genind object. The dataset `simG` are simulated microsatellite data of three loci and 50 individuals, generated in `rmetasim`. We will load the dataset like so:
 
 ```{r, eval=TRUE}
 data(simG)
@@ -45,7 +44,7 @@ Lastly, we need to determine whether our study system can be better characterize
 
 
 ```{r, eval=TRUE}
-LDNe(simG, crit=0.01, mating="random")
+LDNe(simG, crit = 0.01, mating = "random")
 ```
   
 The output consists of a named vector. The first value is the point estimate for the complete dataset. The following values summarize the jackknifing output.  
@@ -53,7 +52,7 @@ The output consists of a named vector. The first value is the point estimate for
 ***
 **Drift effective population size** 
   
-  Drift effective population size is also called temporal or variance effective population size. It is based on the premise that finite populations experience drift, and this drift can be quantified in changes in allele frequencies from one generation to the next. Thus we need genotypic data of at least one locus (but more loci are always better) from two or more generations. The dataset `simG3` are simulated microsatellite data of three loci and 50 individuals per generations, generated in rmetasim (Strand and Niehaus 2014). It is important to note that each generation has to be stored as its own population within the genind object. We will load the dataset like so:
+  Drift effective population size is also called temporal or variance effective population size. It is based on the premise that finite populations experience drift, and this drift can be quantified in changes in allele frequencies from one generation to the next. Thus we need genotypic data of at least one locus (but more loci are always better) from two or more generations. The dataset `simG3` are simulated microsatellite data of three loci and 50 individuals per generations, generated in `rmetasim`. It is important to note that each generation has to be stored as its own population within the genind object. We will load the dataset like so:
 
 ```{r, eval=TRUE}
 data(simG)
